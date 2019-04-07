@@ -1,0 +1,18 @@
+{
+  "name": "happy_coding",
+  "version": "1.0.0",
+  "description": "my coding lab",
+  "main": "index.js",
+  "repository": "git@github.com:hyf152632/happy_coding.git",
+  "author": "andy huo",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
+    "babel-jest": "^24.5.0",
+    "jest": "^24.5.0"
+  }
+}
