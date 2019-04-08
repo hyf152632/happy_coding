@@ -24,4 +24,5 @@ const Fibonacci = (n, a = 0, b = 1) => {
   if (n <= 1) return b
   return Fibonacci(n - 1, b, a + b)
 }
+
 export { reverseStr, isPlalindrome, Fibonacci }
