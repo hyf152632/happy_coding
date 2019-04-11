@@ -1,5 +1,5 @@
 module.exports = api => {
-  const isTest = api.env('test')
+  const isTest = api.env('test');
   // You can use isTest to determine what presets and plugins to use.
 
   return {
@@ -11,7 +11,9 @@ module.exports = api => {
             node: 'current'
           }
         }
-      ]
-    ]
-  }
-}
+      ],
+      '@babel/preset-react'
+    ],
+    plugins: ['@babel/plugin-proposal-class-properties']
+  };
+};
