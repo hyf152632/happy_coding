@@ -14,6 +14,17 @@ module.exports = api => {
       ],
       '@babel/preset-react'
     ],
-    plugins: ['@babel/plugin-proposal-class-properties']
+    plugins: [
+      '@babel/plugin-proposal-class-properties',
+      [
+        'module-resolver',
+        {
+          root: ['./src'],
+          alias: {
+            src: ''
+          }
+        }
+      ]
+    ]
   };
 };

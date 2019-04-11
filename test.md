@@ -85,13 +85,13 @@ stub:
 // 如果为 window 对象注入(即传递)一个 stub, 那么原本很复杂的测试就会变得比较简单了。
 describe('setLocation test', () => {
   it('should set the URL into location fo window', () => {
-    const windowStub = {}
-    const url = 'http://example.com'
-    setLocation(windowStub, url)
+    const windowStub = {};
+    const url = 'http://example.com';
+    setLocation(windowStub, url);
 
-    expect(windowStub.location).to.be.eql(url)
-  })
-})
+    expect(windowStub.location).to.be.eql(url);
+  });
+});
 
 //依赖注入对象的 windowStub 是一个 stub, 而不是 mock, 这是因为测试想要知道调用被测函数后这个依赖对象的状态。
 ```
@@ -114,19 +114,19 @@ describe('setLocation test', () => {
 //getCurrentPosition
 describe('locate test', () => {
   it('should register handlers with getCurrentPosition', done => {
-    const original = navigator.geolocation.getCurrentPosition
+    const original = navigator.geolocation.getCurrentPosition;
 
     navigator.geolocation.getCurrentPosition = function(success, error) {
-      expect(success).to.be.eql(onSuccess)
-      expect(error).to.be.eql(onError)
-      done()
-    }
+      expect(success).to.be.eql(onSuccess);
+      expect(error).to.be.eql(onError);
+      done();
+    };
 
-    locate()
+    locate();
 
-    navigator.geolocation.getCurrentPosition = original
-  })
-})
+    navigator.geolocation.getCurrentPosition = original;
+  });
+});
 
 //我们在测试 setLocation 函数时注入了依赖。这里也可以这么做，但是没这个必要。 locate 函数从 window对象的navigator对象的geolocation属性得到getCurrentPosition函数。与window对象的location属性不同，navigator的属性更容易模拟。
 //我们在这个测试中就是这么做的，我们复制了原始的getCurrentPosition函数，然后用模拟的函数代替了它。最后，我们又用原本的函数替换了geolocation中的函数
@@ -139,34 +139,34 @@ describe('locate test', () => {
 第一步：创建 sandbox
 
 ```js
-let sandbox
+let sandbox;
 
 beforeEach(() => {
-  sandbox = sinon.sandbox.create()
-})
+  sandbox = sinon.sandbox.create();
+});
 
 afterEach(() => {
-  sandbox.restore()
-})
+  sandbox.restore();
+});
 
 //use:
-const aSpy = sandbox.spy(existingFunction)
+const aSpy = sandbox.spy(existingFunction);
 
-expect(aSpy.called).to.be.true
+expect(aSpy.called).to.be.true;
 
-expect(aSpy).called
+expect(aSpy).called;
 
-expect(aSpy).to.have.been.calledWith('magic')
+expect(aSpy).to.have.been.calledWith('magic');
 
 const aStub = sandbox
   .stub(util, 'alias')
   .withArgs('Robert')
-  .returns('Bob')
+  .returns('Bob');
 
 const aMock = sandbox
   .mock(util)
   .expects('alias')
-  .withArgs('Robert')
+  .withArgs('Robert');
 ```
 
 beforeEach 和 afterEach 这样的“三明治”方法，可能有多个测试套件会用到这两个函数，所以我们不要将它们放在某个特定的测试套件中，而是在一个独立于所有测试套件的外部文件中编写。
@@ -179,12 +179,12 @@ describe('locate test', () => {
     const getCurrentPositionMock = sandbox
       .mock(navigator.geolocation)
       .expects('getCurrentPosition')
-      .withArgs(onSuccess, onError)
-    locate()
+      .withArgs(onSuccess, onError);
+    locate();
 
-    getCurrentPositionMock.verify()
-  })
-})
+    getCurrentPositionMock.verify();
+  });
+});
 ```
 
 stub 用来测试状态， mock 更适合用来测试交互或行为。
@@ -192,46 +192,47 @@ stub 用来测试状态， mock 更适合用来测试交互或行为。
 stub:
 
 ```js
-const onError = error => (document.getElementById('error').innerHTML = error.message)
+const onError = error =>
+  (document.getElementById('error').innerHTML = error.message);
 
 describe('onError test', () => {
   it('should set the error DOM element', () => {
-    const domElement = { innerHTML: '' }
+    const domElement = { innerHTML: '' };
     sandbox
       .stub(document, 'getElementById')
       .withArgs('error')
-      .returns(domElement)
+      .returns(domElement);
 
-    const message = "you're kidding"
-    const positionError = { message }
+    const message = "you're kidding";
+    const positionError = { message };
 
-    onError(positionError)
+    onError(positionError);
 
-    expect(domElement.innerHTML).to.be.eql(message)
-  })
-})
+    expect(domElement.innerHTML).to.be.eql(message);
+  });
+});
 ```
 
 spy:
 
 ```js
 const onSuccess = position => {
-  const { latitude, longitude } = position.coords
+  const { latitude, longitude } = position.coords;
 
-  const url = createURL(latitude, longitude)
-  setLocation(window, url)
-}
+  const url = createURL(latitude, longitude);
+  setLocation(window, url);
+};
 
 describe('onSuccess test', () => {
   it('should call createURL with latitude and longitude', () => {
-    const createURLSpy = sandbox.spy(window, 'createURL')
-    const position = { coords: { latitude: 40.41, longitude: -105.55 } }
+    const createURLSpy = sandbox.spy(window, 'createURL');
+    const position = { coords: { latitude: 40.41, longitude: -105.55 } };
 
-    onSuccess(position)
+    onSuccess(position);
 
-    expect(createURLSpy).to.have.been.calledWith(40.41, -105.55)
-  })
-})
+    expect(createURLSpy).to.have.been.calledWith(40.41, -105.55);
+  });
+});
 
 //在这个测试中， 我们首先为 createURL 函数创建一个 spy.
 //这个 spy 只拦截和记录传给真正函数的参数。它不会阻塞或者绕过该调用。真正的函数仍然会执行。
@@ -239,17 +240,17 @@ describe('onSuccess test', () => {
 
 ```js
 it('should call setLocation with URL, returned by createURL', () => {
-  const url = 'http://www.example.com'
+  const url = 'http://www.example.com';
 
-  sandbox.stub(window, 'createURL').returns(url)
+  sandbox.stub(window, 'createURL').returns(url);
 
-  const setLocationSpy = sandbox.spy(window, 'setLocation')
+  const setLocationSpy = sandbox.spy(window, 'setLocation');
 
-  const position = { coords: { latitude: 40.41, longitude: -105.55 } }
-  onSuccess(position)
+  const position = { coords: { latitude: 40.41, longitude: -105.55 } };
+  onSuccess(position);
 
-  expect(setLocationSpy).to.have.been.calledWith(window, url)
-})
+  expect(setLocationSpy).to.have.been.calledWith(window, url);
+});
 ```
 
 自动化测试有助于创造良好的设计， 良好的设计让代码更易于测试。
@@ -281,3 +282,7 @@ it('should call setLocation with URL, returned by createURL', () => {
 自动化测试时达到目的的一种手段。真正的目标是开发高度可维护的，有价值的软件，从而能够放心，快速地对其进行修改。
 
 架构和决策设计几个关键准则：可伸缩性，可靠性，可扩展性，安全性，性能等。
+
+## test react
+
+[react-testing-library](https://testing-library.com/docs/react-testing-library/cheatsheet)
