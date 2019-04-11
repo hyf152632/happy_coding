@@ -36,4 +36,8 @@ describe('Fibonacci', () => {
   test('should return 55, if param is 10', () => {
     expect(Fibonacci(10)).toBe(55)
   })
+
+  test('canary test', () => {
+    expect(true).toBeTruthy()
+  })
 })
