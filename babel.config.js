@@ -21,7 +21,8 @@ module.exports = api => {
         {
           root: ['./src'],
           alias: {
-            src: ''
+            '@src': './src',
+            '@test': './test'
           }
         }
       ]
