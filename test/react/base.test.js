@@ -48,7 +48,6 @@ describe('test render', () => {
 
     //Wait for page to update with query text
     const items = await findAllByText(/Item #[0-9]: /)
-
     expect(items).toHaveLength(10)
   })
 })
