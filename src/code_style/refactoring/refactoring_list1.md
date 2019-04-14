@@ -1,5 +1,7 @@
 # 重构名录
 
+## 第一部分：第一组重构
+
 1. 提炼函数(Extrac Function)
    反向重构: 内联函数
 
@@ -76,3 +78,328 @@
    对于所有可变的数据，只要它的作用域超出单个函数，就将其封装起来，只允许通过函数访问。数据的作用域越大，封装就越重要。
    封装数据很重要，不过，不可变数据更重要。如果数据不能修改，就根本不需要数据更新前的验证或者其它逻辑钩子。
    不可变是强大的代码防腐剂。
+
+   js 中可以把变量和访问函数搬移到单独的一个文件中，并且只导出访问函数，这样就限制了变量的可见性。
+
+7. 变量改名(Rename Variable)
+
+   ```js
+   let a = height * width
+   //to
+   let area = height * width
+   ```
+
+   好的命名是整洁编程的核心。
+   如果要改名的变量只作用于一个函数（临时变量或者参数），对其改名是最简单的。
+   如果变量作用域不止于单个函数，通常运用封装变量。
+
+8. 引入参数对象(Introduce Parameter Object)
+   如果一组数据项总是结伴而行，出没于一个又一个函数。这样一组数据就是所谓的数据泥团，代之以一个数据结构。
+   这项重构真正的意义在于，它会催生代码中更深层次的改变。一旦识别出新的数据结构，就可以重组程序的行为来使用这些结构。
+
+   声明一个类，而不是基本的 js 对象，因为这个重构通常只是一系列重构的起点，随后会把行为搬移到新建的对象中。
+
+   ```js
+   class NumberRange {
+     constructor(min, max) {
+       this._data = { min, max }
+     }
+     get min() {
+       return this._data.min
+     }
+     get max() {
+       return this._data.max
+     }
+     contains(arg) {
+       return arg >= this.min && arg <= this.max
+     }
+   }
+   function readingsOutsideRange(station, range) {
+     return station.readings.filter(r => r.temp < range.min || r.temp > range.max)
+   }
+
+   const range = new NumberRange(operatingPlan.temperatureFloor, operatingPlan.temperatureCeiling)
+   readingsOutsideRange(station, range)
+   ```
+
+9. 函数组合成类(Combine Functions into Class)
+
+   ```js
+   function base(aReading) {}
+   function taxableCharge(aReading) {}
+   function calculateBaseCharge(aReading) {}
+   //to
+   class Reading {
+     base() {}
+     taxableCharge() {}
+     calculateBaseCharge() {}
+   }
+   ```
+
+   类，在大多数现代编程语言中都是基本构造。它们把数据与函数捆绑到同一个环境中，将一部分数据与函数暴露给其他程序元素以便协作。
+   它们是面向对象语言的首要构造，在其他程序设计方法中页同样有用。
+   //凡事可以用对象表达的，用函数也可以表达。
+
+   类似这样的一组函数不仅可以组合成一个类，而且可以组合成一个嵌套函数。
+   通常我更倾向于类而非嵌套函数，因为后者测试起来会比较困难。
+
+   在有些编程语言中，类不是一等公民，而函数则是。面对这样的语言，可以用"函数作为对象",的形式来实现这个重构手法。
+
+10. 函数组合成变换(Combine Function into Transfrom)
+
+    ```js
+    function base(aReading) {}
+    function taxableCharge(aReading) {}
+
+    //to
+    function enrichReading(argReading) {
+      const aReading = _.cloneDeep(argReading)
+      aReading.baseCharge = base(aReading)
+      aReading.taxableCharge = taxableCharge(aReading)
+      return aReading
+    }
+    ```
+
+    在软件中，经常需要把数据“喂"给一个程序，让它再计算出各种派生信息。
+    函数组合成变换的替代方案是函数组合成类。
+    根据代码库中已有的编程风格来选择使用哪一个。
+    两者的一个重要区别是：如果代码中会对源数据做更新，那么使用类要好得多；如果使用变换，派生数据会被存储在新生成的记录中，一旦源数据被修改，就会遭遇数据不一致。
+
+    [提炼函数]也能避免重复，但孤立存在的函数常常很难找到，只有把函数和它们操作的数据放在一起，用起来才方便。
+    引入变换或者类都是为了让相关的逻辑找起来方便。
+
+    这个变换函数返回的本质上仍是原来的对象，只是添加了更多的信息在上面。对于这种函数，更喜欢用"enrich"(增强) 来命名，如果它生成的是跟原来完全不同的对象，就会用"transform"来命名。
+
+11. 拆分阶段(Split Phase)
+
+    ```js
+    const orderData = orderString.split(/\s+/)
+    const productPrice = priceList[orderData[0.split('-')[1]]]
+    const orderPrice = parseInt(orderData[1]) * productPrice
+
+    //to
+    const orderRecord = parseOrder(order)
+    const orderPrice = price(orderRecord, priceList)
+
+    function parseOrder(aString) {
+        const values = aString.split(/\s+/)
+        return ({
+            productID: values[0].split('-')[1]
+            quantity: parseInt(values[1])
+        })
+    }
+    function price(order, priceList) {
+        return order.quantity * priceList[order.productID]
+    }
+    ```
+
+    编译器是最典型的例子。
+    每一步都有边界明确的范围，可以聚焦思考其中一步，而不用理解其他步骤的细节。
+    如果一块代码中出现了上下几段，各自使用不同的一组数据和函数，这就是最明显的线索。将这些代码片段拆分成各自独立的模块，能更明确地标示出它们之间的差异。
+    例如：手上有一段”计算订单价格“的代码，至于订单中的商品是什么，我们从代码中看不出来，也不太关心。
+
+## 第二部分 封装
+
+分解模块时最重要的标准，也许就是识别出哪些模块应该对外界隐藏的小秘密了。
+
+类和模块已然是实施封装的最大实体了，但小一点的函数对于封装实现细节也有所裨益。
+
+1. 封装记录(Encapsulate Record)
+   以数据类取代记录(Replace Record with Data Class)
+
+   ```js
+   organization = { name: 'Acme Gooseberries', country: 'GB' }
+   //to
+   class Organization {
+     constructor(data) {
+       this._name = data.name
+       this._country = data.country
+     }
+     get name() {
+       return this._name
+     }
+     set name(arg) {
+       this._name = arg
+     }
+     get country() {
+       return this._country
+     }
+     set country(arg) {
+       this._country = arg
+     }
+   }
+   ```
+
+2. 封装集合(Encapsulate Collection)
+
+   ```js
+   class Person {
+     get courses() {
+       return this._courses
+     }
+     set courses(aList) {
+       this._courses = aList
+     }
+   }
+   //to
+   class Person {
+     get courses() {
+       return this._courses.slice()
+     }
+     addCourse(aCourse) {}
+     removeCourse(aCourse) {}
+   }
+   ```
+
+   不要让集合的取值函数返回原始集合，这就避免了客户端的意外修改。
+   一种避免直接修改集合的方法是，永远不直接返回集合的值。
+
+   js 中原生的数组排序函数 sort() 会修改原数组。
+
+3. 以对象取代基本类型(Replace Primitive with Object)
+   以对象取代数据值(Replace Data Value with Object)
+   以类取代类型码(Replace Type Code with Class)
+
+   ```js
+   orders.filter(o => 'heigh' === o.priority || 'rush' === o.priority)
+   //to
+   orders.filter(o => o.priority.higherThan(new Priority('normal')))
+   ```
+
+   一旦我发现对某个数据的操作不仅仅局限于打印时，就会为它创建一个新类。一开始这个类也许只是简单包装一下简单类型的数据。
+   不过只要类有了，日后添加的业务逻辑就有地可去了。
+
+4. 以查询取代临时变量(Replace Temp with Query)
+
+   ```js
+   const basePrice = this._quantity * this._itemPrice
+   if(base > 1000) {
+       return basePrice * 0.95
+   } else {
+       return basePrice * 0.98
+   }
+   //to
+   get basePrice() {this._quantity * this._itemPrice}
+   //...
+   if(this.basePrice > 1000){
+       return this.basePrice * 0.95
+   } else {
+       return this.basePrice * 0.98
+   }
+   ```
+
+5. 提炼类(Extract Class)
+
+6. 内联类(Inline Class)
+
+7. 隐藏委托关系(Hide Delegate)
+   反向重构： 移除中间人
+
+   ```js
+   manager = aPerson.department.manager
+   //to
+   manager = aPerson.manager
+
+   classs Person {
+       get manager(){ return this.department.manager }
+   }
+   ```
+
+8. 移除中间人(Remove Middle Man)
+
+   ```js
+   manager = aPerson.manager
+   class Person {
+     get manager() {
+       return this.department.manager
+     }
+   }
+   //to
+   manager = aPerson.department.manager
+   ```
+
+   何时应该隐藏委托关系，何时应该移除中间人，没有绝对的标准————代码环境自然会给出该使用哪种手法的线索，具备思考能力的程序员应能分辨出何种手法更佳。
+
+9. 替换算法(Substitute Algorithm)
+
+   ```js
+   function foundPerson(people) {
+     for (let i = 0; i < people.length; i++) {
+       if (people[i] === 'Don') {
+         return 'Don'
+       }
+       if (people[i] === 'John') {
+         return 'John'
+       }
+       if (people[i] === 'Kent') {
+         return 'Kent'
+       }
+     }
+     return ''
+   }
+
+   //to
+   function foundPerson(people) {
+     const candidates = ['Don', 'John', 'Kent']
+     return people.find(p => candidates.includs(p)) || ''
+   }
+   ```
+
+   "重构" 可以把一些复杂的东西分解为较简单的小块，但有时你就必须壮士断腕，删掉整个算法，代之以较简单的算法。
+
+## 第三部分 搬移特性
+
+到目前为止，介绍的重构手法都是关于如何新建，移除或重命名程序的元素。
+此外，还有另一种类型的重构也很重要，那就是在不同的上下文之间搬移元素。
+
+1. 搬移函数(Move Method)
+
+   ```js
+   class Account {
+     get overdraftChange() {}
+   }
+   //to
+   class AccountType {
+     get overdraftChange() {}
+   }
+   ```
+
+   模块化是优秀软件设计的核心所在，好的模块化能够在修改程序时只需理解程序的一小部分。为了设计出高度模块化的程序，得保证互相关联的软件要素都能集中到一块，并确保块与块之间的联系易于查找，直观易懂。
+
+   对模块设计的理解不是一成不变的，随着对代码的理解加深，会知道哪些软件要素如何组织最为恰当。要将这种理解反映到代码上，就得不断地搬移这些元素。
+
+   搬移函数最直接的一个动因是，它频繁引用其他上下文中的元素，而对自身上下文中的元素却关心甚少。
+
+2. 搬移字段(Move Field)
+
+   ```js
+   class Customer {
+     get plan() {
+       return this._plan
+     }
+     get discountRate() {
+       return this._discountRate
+     }
+   }
+   //to
+   class Customer {
+     get plan() {
+       return this._plan
+     }
+     get discountRate() {
+       return this.plan.discountRate
+     }
+   }
+   ```
+
+   编程活动中你需要编写许多代码，为系统实现特定的行为，但往往数据结构才是一个健壮程序的根基。一个适应于问题域的良好数据结构，可以让行为代码变得简单明了，
+   而一个糟糕的数据结构则将招致许多无用代码，这些代码更多是在差劲的数据结构中间纠缠不清，而非为系统实现有用的行为。
+   代码凌乱，势必难以理解；不仅如此，坏的数据结构本身也会掩藏程序的真实意图。
+
+3. 搬移语句到函数(Move Statements into Function)
+   反向重构： 搬移语句到调用者
+
+   要维护代码库的健康发展，需要遵守几条黄金守则，其中最重要的一条当属“消除重复”。
+   如果发现调用某个函数时，总有一些相同的代码也需要每次执行，那么考虑将此段代码合并到函数里头。
+
+4. 搬移语句到调用者(Move Statements to Callers)
