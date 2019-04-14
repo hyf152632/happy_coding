@@ -403,3 +403,107 @@
    如果发现调用某个函数时，总有一些相同的代码也需要每次执行，那么考虑将此段代码合并到函数里头。
 
 4. 搬移语句到调用者(Move Statements to Callers)
+
+5. 以函数调用取代内联代码(Replace Inline Code with Function Call)
+
+   ```js
+   let appliesToMass = false
+   for (const s of states) {
+     if (s === 'MA') {
+       appliesToMass = true
+     }
+   }
+
+   //to
+   appliesToMass = states.includes('MA')
+   ```
+
+6. 移动语句(Slide Statements)
+   合并重复的代码片段(Consilidate Duplicate Conditional Fragments)
+
+   ```js
+   const pricingPlan = retrievePricingPlan()
+   const order = retrieveOrder()
+   let charge
+   const chargePerUnit = pricingPlan.unit
+
+   //to
+   const pricingPlan = retrievePricingPlan()
+   const chargePerUnit = pricingPlan.unit
+   const order = retreiveOrder()
+   let charge
+   ```
+
+   让存在关联的东西一起出现，可以使代码更容易理解。
+   如果有几行代码取用了同一个数据结构，那么最好是让它们在一起出现。
+
+7. 拆分循环(Split Loop)
+
+   ```js
+   let averageAge = 0
+   let totalSalary = 0
+   for (const p of people) {
+     averageAge += p.age
+     totalSalary += p.salary
+   }
+   averageAge = averageAge / people.length
+   //to
+   let totalSalary = 0
+   for (const p of people) {
+     totalSalary += p.salary
+   }
+   let averageAge = 0
+   for (const p of people) {
+     averageAge += p.age
+   }
+   averageAge = averageAge / people.length
+   ```
+
+   本手法的意义不仅在于拆分出循环本身，而且在于它为进一步优化提供了良好的起点————下一步我通常会寻求将每个循环提炼到独立的函数中。
+
+   ```js
+   function totalSalary() {
+     let totalSalary = 0
+     for (const p of people) {
+       totalSalary += p.salary
+     }
+     return totalSalary
+   }
+
+   function youngestAge() {
+     let youngest = people[0] ? people[0].age : Infinity
+     for (const p of people) {
+       if (p.age < youngest) youngest = p.age
+     }
+     return youngest
+   }
+   //totalSalary 使用以管道取代循环 进一步重构：
+   function totalSalary() {
+     return people.reduce((total, p) => total + p.salary, 0)
+   }
+   //youngestAge 用 替换算法 替之以更好的算法：
+   function youngestAge() {
+     return Math.min(...people.map(p => p.age))
+   }
+   ```
+
+8. 以管道取代循环(Replace Loop with Pipeline)
+
+   ```js
+   const names = []
+   for (const i of input) {
+     if (i.job === 'programmer') {
+       names.push(i.name)
+     }
+   }
+   //to
+   const names = input.filter(i => i.job === 'programmer').map(i => i.name)
+   ```
+
+9. 移除死代码(Remove Dead Code)
+
+   ```js
+   if (false) {
+     doSomethingThatUsedToMatter()
+   }
+   ```
