@@ -507,3 +507,144 @@
      doSomethingThatUsedToMatter()
    }
    ```
+
+## 第四部分 重新组织数据
+
+1. 拆分变量(Split Variable)
+   移除对参数的赋值(Remove Assignments to Parameters)
+   分解临时变量
+
+   ```js
+   let temp = 2 * (height + width)
+   console.log(temp)
+   temp = height * width
+   console.log(temp)
+   //to
+   const perimeter = 2 * (height + width)
+   console.log(perimeter)
+   const area = height * width
+   console.log(area)
+   ```
+
+2. 字段改名(Rename Field)
+
+   ```js
+   class Organization {
+     get name() {}
+   }
+   //to
+   class Organization {
+     get title() {}
+   }
+   ```
+
+3. 以查询取代派生变量(Replace Derived Variable with Query)
+
+   ```js
+   get discountedTotal() {return this._discountedTotal}
+   set discount(aNumber) {
+       const old = this._discount
+       this._discount = aNumber
+       this._discountTotal += old - aNumber
+   }
+
+   //to
+   get discountedTotal() {return this._baseTotal - this._discount}
+   set discount(aNumber){this._discount = aNumber}
+   ```
+
+   可变数据是软件中最大的错误源头之一。
+
+4. 将引用对象改为值对象(Change Reference to Value)
+   反向重构：将值对象改为引用对象
+
+   ```js
+   class Product {
+     applyDiscount(arg) {
+       this._price.amount -= arg
+     }
+   }
+   //to
+   class Product {
+     applyDiscount(arg) {
+       this._price = new Money(this._price.amount - arg, this._price.currency)
+     }
+   }
+   ```
+
+5. 将值对象改为引用对象(Change Value to Reference)
+
+   ```js
+   let customer = new Customer(customerData)
+   //to
+   let customer = customerRepository.get(customerData.id)
+   ```
+
+## 第五部分 简化条件逻辑
+
+1. 分解条件表达式(Decompose Conditional)
+
+   ```js
+   if (!aDate.isBefore(plan.summerStart) && !aDate.isAfter(plan.summerEnd)) {
+     charge = quantity * plan.summerRate
+   } else {
+     charge = quantity * plan.regularRate + plan.regularServiceCharge
+   }
+   //to
+   if (summer()) {
+     charge = summerCharge()
+   } else {
+     charge = regularCharge()
+   }
+
+   charge = summer() ? summerCharge() : regularCharge()
+   ```
+
+2. 合并条件表达式(Consolidate Conditional Expression)
+
+   ```js
+   if (anEmployee.seniority < 2) return 0
+   if (anEmployee.monthsDisabled > 12) return 0
+   if (anEmployee.isPartTime) return 0
+
+   //to
+   if (isNotEligibleForDisability()) return 0
+   function isNotEligibleForDisability() {
+     return anEmployee.seniority < 2 || anEmployee.monthsDisbled > 12 || anEmployee.isPartTime
+   }
+   ```
+
+   如果有这样一串条件检查： 检查条件各不相同，最终行为却一致。如果发现这种情况，就应该使用"逻辑或" 和 "逻辑与" 将它们合并为一个条件表达式。
+
+3. 以卫句取代嵌套条件表达式(Replace Nested Conditional with Guard Clauses)
+
+   ```js
+   function getPayAmount() {
+     let result
+     if (isDead) {
+       result = deadAmount()
+     } else {
+       if (isSeparated) {
+         result = separatedAmount()
+       } else {
+         if (isRetired) {
+           result = retiredAmount()
+         } else {
+           result = normalPayAmount()
+         }
+       }
+     }
+     return result
+   }
+
+   function getPayAmount() {
+     if (isDead) return deadAmount()
+     if (isSeparated) return separatedAmount()
+     if (isRetired) return retiredAmount()
+     return normalPayAmount()
+   }
+   ```
+
+4. 以多态取代条件表达式(Replace Conditional with Polymorphism)
+
+   switch...case 语句 用 类 的 多态 替代。
