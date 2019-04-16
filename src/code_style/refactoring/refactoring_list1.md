@@ -648,3 +648,111 @@
 4. 以多态取代条件表达式(Replace Conditional with Polymorphism)
 
    switch...case 语句 用 类 的 多态 替代。
+
+5. 引入特例(Introduce Special Case)
+
+   ```js
+   if (aCustomer === 'unknown') customerName = 'occupant'
+
+   //to
+   class UnknownCustomer {
+     get name() {
+       return 'occupant'
+     }
+   }
+   ```
+
+6. 引入断言(Introduce Assertion)
+
+   ```js
+   if (this.discountRate) {
+     base = base - this.discountRate * base
+   }
+   //to
+   assert(this.discountRate >= 0)
+   if (this.discountRate) {
+     base = base - this.discountRate * base
+   }
+   ```
+
+## 第六部分 重构 API
+
+模块和函数是软件的骨肉，而 API 则是将骨肉连接起来的关节。
+
+好的 API 会把更新数据的函数与只是读取数据的函数清晰分开。
+
+1. 将查询函数与修改函数分离(Separate Query from Modifier)
+
+   ```js
+   function getTotalOutstandingAndSendBill() {
+     const result = customer.invoices.reduce((total, each) => each.amount + total, 0)
+     sendBill()
+     return result
+   }
+   //to
+   function totalOutstanding() {
+     return customer.invoices.reduce((total, each) => each.amount + total, 0)
+   }
+   function sendBill() {
+     emailGateway.send(formatBill(customer))
+   }
+   ```
+
+   任何有返回值的函数，都不应该有看得到的副作用————命令与查询分离(Command-Query Separation)
+   如果遇到既有返回值又有副作用的函数，就试着将查询动作从修改动作中分离出来。
+
+2. 函数参数化(Parameterize Function)
+   令函数携带参数(Parameterize Method)
+
+```js
+function tenPercentRaise(aPerson) {
+  aPerson.salary = aPerson.salary.multiply(1.1)
+}
+function fivePercentRaise(aPerson) {
+  aPserson.salary = aPerson.salary.multiply(1.05)
+}
+
+//to
+function raise(aPerson, factor) {
+  aPerson.salary = aPerson.salary.multiply(1 + factor)
+}
+```
+
+如果发现两个函数逻辑非常相似，只是一些字面量值不同，可以将其合并成一个函数，以参数的形式传入不同的值，从而消除重复。
+这个重构可以使函数更有用，因为重构后的函数还可以用于处理其他的值。
+
+3.  移除标记参数(Remove Flag Argument)
+    以明确函数取代参数(Replace Parameter with Explicit Methods)
+
+    ```js
+    function setDimension(name, value) {
+      if (name === 'height') {
+        this._height = value
+        return
+      }
+      if (name === 'width') {
+        this._width = value
+        return
+      }
+    }
+    //to
+    function setHeight(value) {
+      this._height = value
+    }
+    function setWidth(value) {
+      this._width = value
+    }
+    ```
+
+"标记参数"是这样的一种参数：调用者用它来指示被调函数应该执行哪一部分逻辑
+如果一个函数有多个标记参数，可能就不得不将其保留，否则就得针对各个参数的各种取值的所有组合情况提供明确函数。这也是一个星号，说明这个函数可能做得太多，应该考虑是否能用更简单的函数来组合出完整的逻辑。
+
+4. 保持对象完整(Preserve Whole Object)
+
+   ```js
+   const low = aRoom.daysTempRange.low
+   const high = aRoom.daysTempRange.high
+   if(aPlan.withinRange(low, high))
+   //to
+   if(aPlan.withinRange(aRoom.daysTempRange))
+   ```
