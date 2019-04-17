@@ -756,3 +756,70 @@ function raise(aPerson, factor) {
    //to
    if(aPlan.withinRange(aRoom.daysTempRange))
    ```
+
+5. 以查询取代参数(Replace Parameter with Query)
+   以函数取代参数(Replace Parameter with Method)
+   反向重构：以参数取代查询
+
+   ```js
+   availableVacation(anEmployee, anEmployee.grade)
+   function availableVacation(anEmployee, grade) {
+     //calculate vacation...
+   }
+   //to
+   availableVacation(anEmployee)
+
+   function availableVacation(anEmployee) {
+     const grade = anEmployee.grade
+     //calculate vacation...
+   }
+   ```
+
+6. 以参数取代查询(Replace Query with Parameter)
+   反向重构: 以查询取代参数
+
+   ```js
+   targetTemperature(aPlan)
+   function targetTemperature(aPlan) {
+     current = thermostat.currentTemperature
+     //...
+   }
+   //to
+   targetTemperature(aPlan, thermostat.currentTemperature)
+   function targetTemperature(aPlan, currentTemperature) {
+     //...
+   }
+   ```
+
+   如果一个函数用同样的参数调用总是给出同样的结果，我们就说这个函数具有“引用透明性(referential transparency)”
+   有一个常见的模式：在负责逻辑处理的模块中只有纯函数，其外再包裹处理 I/O 和其他可变元素的逻辑代码。
+
+7. 移除设值函数(Remove Setting Method)
+
+   ```js
+   class Person {
+     get name() {}
+     set name(aString) {}
+   }
+   //to
+   class Person {
+     get name() {}
+   }
+   ```
+
+   如果为某个字段提供了设值函数，这就暗示这个字段可以被改变。如果不希望在对象创建之后此字段还有机会被改变，那就不要为它提供设置函数(同时该字段声明为不可变)
+
+8. 以工厂函数取代构造函数(Replace Constructor with Factory Function)
+   以工厂函数取代构造函数(Replace Constructor with Factory Method)
+
+   ```js
+   leadEngineer = new Employee(document.leadEngineer, 'E')
+   //to
+   leadEngineer = createEngineer(document.leadEngineer)
+   function createEngineer(engineer) {
+     return new Employee(engineer, 'E')
+   }
+   ```
+
+   与一般的函数相比，构造函数常有一些丑陋的局限性。
+   工厂函数就不受这些限制。工厂函数的实现内部可以调用构造函数，但也可以换成别的实现方式。
