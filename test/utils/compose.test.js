@@ -1,4 +1,4 @@
-import compose from '@src/utils/compose';
+import { compose, composeRight } from '@src/utils/compose';
 
 describe('test compose func', () => {
   test('only one fun', () => {
@@ -27,5 +27,14 @@ describe('test compose func', () => {
         add3
       )(2, 3)
     ).toBe(10);
+  });
+});
+
+describe('composeRight func test', () => {
+  it('should be 10', () => {
+    const add = (a, b) => a + b;
+    const add2 = add.bind(null, 2);
+    const add3 = add.bind(null, 3);
+    expect(composeRight(add3, add2, add)(2, 3)).toBe(10);
   });
 });
