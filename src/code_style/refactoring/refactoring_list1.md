@@ -823,3 +823,178 @@ function raise(aPerson, factor) {
 
    与一般的函数相比，构造函数常有一些丑陋的局限性。
    工厂函数就不受这些限制。工厂函数的实现内部可以调用构造函数，但也可以换成别的实现方式。
+
+9. 以命令取代函数(Replace Function with Command)
+   以函数对象取代函数(Replace Method with Method Object)
+
+```js
+function score(candidate, medicalExam, scoringGuide) {
+  let result = 0
+  let healthLevel = 0
+  //long body code
+}
+//to
+class Scorer {
+  constructor(candidate, medicalExam, scoringGuide) {
+    this._candidate = candidate
+    this._medicalExam = medicalExam
+    this._scoringGuide = scoringGuide
+  }
+  execute() {
+    this._result = 0
+    this._healthLevel = 0
+    //long body code
+  }
+}
+```
+
+将函数封装成自己的对象，这样的对象，称为”命令对象“
+只有当特别需要命令对象提供的某种能力而普通的函数无法提供这种能力的时候，才考虑选择使用命令对象。
+除了函数调用本身，命令对象还可以支持附加的操作，例如撤销操作。
+可以通过对象提供的方法来设置命令的参数值，从而支持更丰富的生命周期管理能力。
+借助继承和钩子对函数行为加以定制。
+如果编程语言支持对象但不支持函数作为一等公民，通过命令对象就可以给函数提供大部分相当于一等公民的能力。
+在这里，命令指一个对象，其中封装了一个函数调用请求。
+
+一个典型的应用场景就是拆解复杂的函数，以便于理解和修改：
+
+```js
+function score(candidate, medicalExam, scoringGuide) {
+  let result = 0
+  let healthLevel = 0
+  let heighMedicalRiskFlag = false
+
+  if (medicalExam.isSmoker) {
+    healthLevel += 10
+    highMedicalRiskFlag = true
+  }
+  let certificationGrade = 'regular'
+  if (scoringGuide.stateWithLowCertification(candidate.originState)) {
+    certificationGrade = 'low'
+    result -= 5
+  }
+  //lots more code like this
+  result -= Math.max(healthLevel - 5, 0)
+  return result
+}
+//to
+class Scorer {
+  constructor(candidate, medicalExam, scoringGuide) {
+    this._candidate = candidate
+    this._medicalExam = medicalExam
+    this._scoringGuide = scoringGuide
+  }
+  execute() {
+    this._result = 0
+    this._healthLevel = 0
+    this._highMedicalRiskFlag = false
+
+    this.scoreSmoking()
+    this._certificationGrade = 'regular'
+    if (this._scoringGuide.stateWithLowCertification(this._candidate.originState)) {
+      this._certificationGrade = 'low'
+      this._result -= 5
+    }
+    //lots more code like this
+    this._result -= Math.max(this._healthLevel - 5, 0)
+    return this._result
+  }
+  scoreSmoking() {
+    if (this._medicalExam.isSmoker) {
+      this._healthLevel += 10
+      this._highMedicalRiskFlag = true
+    }
+  }
+}
+```
+
+这样就可以像处理嵌套函数一样处理命令对象。实际上，在 JavaScript 中运用此重构手法，的确可以考虑用嵌套函数来代替命令对象。
+
+10. 以函数取代命令(Replace Command with Function)
+
+```js
+class ChargeCalculator {
+  constructor(customer, usage) {
+    this._customer = customer
+    this._usage = usage
+  }
+  execute() {
+    return this._customer.rate * this._usage
+  }
+}
+//to
+function charge(customer, usage) {
+  return customer.rate * usage
+}
+```
+
+如果函数不是太复杂，那么命令对象可能显得过于臃肿，就应该考虑将其变回普通的函数。
+
+## 第七部分 处理继承关系
+
+与任何强有力的特性一样，继承机制十分实时，却也经常被误用，而且经常等你用上一段时间，遇见了痛点，才能察觉误用所在。
+
+1. 函数上移(Pull Up Method)
+   反向重构：函数下移
+
+```js
+class Employee {}
+class Saleman extends Employee {
+  get name() {}
+}
+class Engineer extends Employee {
+  get name() {}
+}
+//to
+class Employee {
+  get name() {}
+}
+class Saleman extends Employee {}
+class Engineer extends Employee {}
+```
+
+2. 字段上移(Pull Up Field)
+
+```java
+class Employee {}
+class Salesman extends Employee {
+    private String name;
+}
+class Engineer extends Employee {
+    private String name;
+}
+//to
+class Employee {
+    protected String name;
+}
+class Salesman extends Employee{}
+class Engineer extends Employee{}
+```
+
+3. 构造函数本体上移(Pull Up Constructor Body)
+
+```js
+class Party {}
+
+class Employee extends Party {
+  constructor(name, id, monthlyCost) {
+    super()
+    this._id = id
+    this._name = name
+    this._monthlyCost = mouthlyCost
+  }
+}
+//to
+class Party {
+  construtor(name) {
+    this._name = name
+  }
+}
+class Employee extends Party {
+  construtor(name, id, monthlyCost) {
+    super(name)
+    this._id = id
+    this._monthlyCost = monthlyCost
+  }
+}
+```
