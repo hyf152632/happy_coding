@@ -233,3 +233,49 @@ ENTRYPOINT：这个关键字是欲执行命令，在创建镜像时不执行，�
 docker build -t image_redis:v1.0
 有了新镜像，就可以通过 docker run 命令创建和使用新容器了。但该镜像只存在于编译主机，如何把编译好的镜像分发给其他机器使用呢？这就需要用到 Docker 仓库中转。
 有了 Dockerfile 文件，维护镜像就很简单了。只需要修改 Dockerfile 的某条语句，通过 docker build 重新构建即可，另外还可以通过'-t'选项指定一个新版本，可以很方便的在新旧两个版本间快速切换。
+
+当我们制作自己的应用镜像时，也尽量考虑使用相同的底层镜像，这样可以极大地降低后续维护的成本。我们根据自己的实际应用场景选择合适自己的基础镜像，也可以在已有的基础镜像上改造提交新镜像作为自己项目的基础镜像。
+但有时候，我们在 Docker Hub 上实在找不到合适自己用的基础镜像，这时就可以从头打造一个完全属于自己的基础镜像。
+
+### 定制私有的基础镜像
+
+使用 debootstrap 工具，可以定制自己需要的最小化的 Linux 基础镜像。
+
+## Docker 仓库管理
+
+前面介绍了 Docker 的容器和镜像，本章介绍最后一个组件————Docker 仓库。
+
+仓库主要用于镜像的存储，它是 Docker 镜像分发，部署的关键。
+
+我们可以使用官方的公有仓库 Docker hub，也可以搭建自己的私有仓库来存储我们的镜像。
+
+### 镜像的公有仓库
+
+Docker hub 还支持用户创建私有的镜像仓库，用于私有镜像的存储和跨主机部署。
+
+docker login 登录 Docker hub， 然后才能上传镜像。
+上传通过 docker push 命令实现
+
+docker search
+
+docker pull
+
+### 私有仓库
+
+Docker 官方已经提供了 docker-registry 组件，我们可以用它来构建我们自己的私有镜像仓库
+
+1. 安装 docker-registry
+   Docker 官方提供了 docker-registry 的镜像，我们可以直接使用该镜像。
+   docker run -p 5000:5000 registry
+   1.1. 使用 rpm 包方式
+   yum install docker-registry-y
+   docker-registry start
+   1.2. 配置文件
+   默认情况下，docker-registry 使用 config_sample.yml 进行各种配置， rpm 方式则使用 /etc/docker-registry.yml
+
+#### 构建安全的私有仓库
+
+docker-registry 没有提供安全认证，所以，所有知道 URL 的人都可以上传镜像。
+我们需要认证功能，可以使用 nginx 构建一个带认证功能的私有仓库。
+
+## Docker 网络和存储管理
