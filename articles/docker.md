@@ -279,3 +279,40 @@ docker-registry 没有提供安全认证，所以，所有知道 URL 的人都�
 我们需要认证功能，可以使用 nginx 构建一个带认证功能的私有仓库。
 
 ## Docker 网络和存储管理
+
+网络是虚拟化技术中最复杂的部分，也是 Docker 应用中的一个重要环节。Docker 中的网络重要解决容器与容器，容器与外部网络，外部网络与容器之间的互相通信的问题。
+
+数据管理：
+Docker 中的容器一旦删除，容器本身对应的 rootfs 文件系统就会被删除，容器中的所有数据也将随之删除。但有的时候，我们想要数据如日志或者其他需要持久化的数据，不随容器的删除而删除。还有的时候，我们希望在同一台 Host 的容器之间可以共享数据。
+
+为此，Docker 提供了数据卷(data volume), 数据卷除了可以持久化数据，还可以用于容器之间共享数据。
+
+Docker 的应用哲学是一个容器一个程序，当然，我们也可以在一个容器中运行多个程序（推荐使用 supervisor), 但这并不是 Docker 推荐的。
+
+Docker 存储驱动
+Docker 存储驱动（storage driver) 是 Docker 的核心组件，它是 Docker 实现分层镜像的基础。
+
+## Docker 项目日常维护
+
+### 宿主机的管理
+
+环境 REHL/Centos
+
+安装 Docker 并启动
+`yum install docker-io`
+启动：
+`service docker start`
+检查 docker 进程是否启动：
+`ps aux | grep docker`
+
+## Docker Swarm 容器集群
+
+项目的核心设计是将几台安装 Docker 的机器组合成一个大的集群，该集群提供给用户管理集群所有容器的操作接口与使用一台 Docker 几乎相同。
+
+Docker Swarmkit 项目是 Docker 公司推出的第二个容器集群项目。
+
+## Docker 插件开发
+
+## Etcd, Cadvisor 和 Kubernetes 实践
+
+Docker 的容器集群管理平台 Kubernetes, 服务发现的键值存储系统 Etcd, 以及容器监控平台 Cadvisor.
