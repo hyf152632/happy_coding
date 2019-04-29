@@ -21,22 +21,22 @@
 // }
 
 const lengthOfLongestWithoutRepeatingSubstringOfAString = s => {
-  if (s === null || s === undefined) return 0;
-  let start = 0;
-  let result = 0;
-  const map = new Map();
+  if (s === null || s === undefined) return 0
+  let start = 0
+  let result = 0
+  const map = new Map()
   for (let i = 0; i < s.length; i++) {
-    let ch = s.charAt(i);
+    let ch = s.charAt(i)
     if (map.has(ch) && map.get(ch) >= start) {
-      start = map.get(ch) + 1;
+      start = map.get(ch) + 1
     } else {
-      result = Math.max(result, i - start + 1);
+      result = Math.max(result, i - start + 1)
     }
-    map.set(ch, i);
+    map.set(ch, i)
   }
-  return result;
-};
-console.log(lengthOfLongestWithoutRepeatingSubstringOfAString('abacdaeac'));
+  return result
+}
+// console.log(lengthOfLongestWithoutRepeatingSubstringOfAString('abacdaeac'))
 
-lengthOfLongestWithoutRepeatingSubstringOfAString('abcabcbb');
-export default lengthOfLongestWithoutRepeatingSubstringOfAString;
+lengthOfLongestWithoutRepeatingSubstringOfAString('abcabcbb')
+export default lengthOfLongestWithoutRepeatingSubstringOfAString
