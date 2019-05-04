@@ -199,3 +199,101 @@ else
     echo "foo was not found"
 fi
 ```
+
+## Copying(cp)
+
+`cp foo.txt /folder/` copy a single file
+`cp -r /path/to/foo /path/to/bar` copy folders
+
+## Find
+
+find is a command to recursively search a directory for files(or directories) that match a criteria, and then perform some action on the slected files.
+
+`find . -name "myFile.txt"`
+
+## sort
+
+`sort file.txt`
+`find * -name pattern | sort`
+`sort -n file`
+`sort -rn file`
+
+## Sourcing
+
+Sourcing a file is different from execution, in that all commands are evaluated within the context of the current bash session - this means that any variables, function, or aliases defined will persist throughout your session.
+
+`source sourceme.sh`
+
+Note that the command `.` is synonymous to source, such that you can simply use
+`. sourceme.sh`
+
+## Bash history substitutions
+
+`history`
+
+Expands to last command
+`!!`
+Expands to the current command
+`!#`
+
+Repeat previous command with sudo
+`sudo !!`
+
+Search in the command history by pattern:
+Press `control + r`and type a pattern.
+
+Switch to newly created directory with `!#:N`
+`mkdir backup_download_directory && cd !#:1`
+
+## Process substitution
+
+compare two files from the web
+`diff <(curl http://www.example.com/page1) <(curl http://www.exmaple.com/page2)`
+
+concatenating files:
+`cat hearder.txt <(cat body.txt) > body.txt`
+
+`cat header.txt body.txt >body.txt.new`
+`mv body.txt.new body.txt`
+
+## Brace Expansion
+
+Modifying filename extension
+`mv filename.{jar,zip}`
+this expands into mv filename.jar filename.zip.
+
+create directories to group files by month and year:
+`mkdir 20{09..11}-{01..12}`
+
+`echo{001..10}`
+
+use increments:
+`echo {0..10..2}`
+
+using brace expansion to create lists:
+`echo {a..z}`
+
+`echo {a..d}{1..3}`
+
+make multiple directories with Sub-Directories:
+`mkdir -p toplevel/sublevel_{01..09}/{child1, child2, child3}`
+
+debugging a bash script with '-x'
+
+find the current shell:
+`echo $0`
+`ps -p $$`
+`echo $$SHELL`
+
+To list available login shells:
+`cat /etc/shells`
+
+change the shell:
+`export SHELL=/bin/bash`
+`exec /bin/bash`
+to change the bash that opens on startup edit .profile and add those lines.
+
+## Networking with Bash
+
+`ifconfig`
+`ifconfig -a`
