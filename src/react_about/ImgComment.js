@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Tooltip, message, Popover, Input, Button } from 'antd';
+import { Tooltip, message, Popover, Input, Button, Avatar, Modal } from 'antd';
 import styles from './index.less';
 import classNames from 'classnames/bind';
 import withHover from './../HOC/withHover';
-import { throttle } from './../../../src/utils/util';
+import withBodyClientDimens from '../HOC/withBodyClientDimens';
+import { timestampToTimeNormal, judgeTimeDiffer_ten } from './../../utils/util';
 
 const cx = classNames.bind(styles);
 const { TextArea } = Input;
@@ -33,12 +34,17 @@ class ZoomPicture extends Component {
 
       commitPublishText: '', //图评块的 textArea value
       isHideCommentList: false, //是否隐藏图评
+
+      isNewAComment: false, //是否是一条新的图评， 这里的逻辑是：后台决定图评的序号 (并且在提交数据(post)的时候，将序号返回过来), 因为只有组件才知道当前的图评是不是新的。
+      //所以这里当新建一个图评的时候，把这个参数置为 true.
+      isShouldShowCommentDetail: false, //是否应该显示图评详情
+      shouldShowCommentDetailFlag: -1, //当前应该显示的图评序号
+
+      isFullScreenMode: false, //是否全屏模式，这里现在没有采用组件内实现的方法，所以这个变量暂时没用
+
+      isShowPictureDisplaySegmentIndicator: false //当放大并且滚动显示图片的时候，指示当前正在显示图片的那块局部区域
     };
 
-    // this.handleCommitBlockCornerMouseMove = throttle(
-    //   this.handleCommitBlockCornerMouseMove,
-    //   30
-    // );
     //图片 wrapper ref
     this.imgRef = React.createRef();
     //容器视口 ref
@@ -58,11 +64,14 @@ class ZoomPicture extends Component {
       imgInfo: {},
       containerInfo: {}
     };
-    //图评块点击和移动信息
+    //图评块corner点击和移动信息
     this.commitBlockInfo = {
       mouseDown: {},
       mouseMove: {}
     };
+
+    //点击已经存在的图评块的信息，用来决定 popover 的显示方向
+    this.commitItemBlockClickInfo = {};
     //点击图片的 mouseDown 计时器
     this.timer = null;
     //图片单击信息
@@ -117,6 +126,7 @@ class ZoomPicture extends Component {
       offsetLeft,
       offsetTop
     } = this.state;
+    const { isFullScreenMode } = this.props;
     const cond = {
       resetSize: () => {
         const isCurrentHasOnResetState =
@@ -134,19 +144,20 @@ class ZoomPicture extends Component {
       },
       magnify: () => this.handleClickedImg(undefined, 'sup'),
       shrink: () => this.handleClickedImg(undefined, 'sub'),
-      addCommit: () =>{
-      const {isHideCommentList} = this.state
-      if(isHideCommentList) return
+      addCommit: () => {
+        const { isHideCommentList } = this.state;
+        if (isHideCommentList) return;
         this.setState({
           isCommentMode: true,
           isLongClick: false
-        })
+        });
       },
       hideCommit: () => {
-      const {isHideCommentList} = this.state
+        const { isHideCommentList } = this.state;
         this.setState({
           isHideCommentList: !isHideCommentList,
-        })
+          isShouldShowCommentDetail: false
+        });
       },
       exitCommitMode: () =>
         this.setState({
@@ -154,10 +165,21 @@ class ZoomPicture extends Component {
           isShowCommitBlock: false,
           commitBlockPopoverVisible: false,
           commitPublishText: ''
-        })
+        }),
+      fullScreen: () => {
+        // this.setState(
+        //   {
+        //     isFullScreenMode: true
+        //   },
+        //   () => {
+        //     message.success('未完成的功能');
+        //   }
+        // )
+        const { handleFullScreen } = this.props;
+        handleFullScreen(!isFullScreenMode);
+      }
     };
     cond[key]();
-    console.log(key, 'operator key.');
   };
   getMoreImgInfo = () => {
     const {
@@ -169,6 +191,7 @@ class ZoomPicture extends Component {
       const {
         componentInfo: { width: containerWidth, height: containerHeight }
       } = this.props;
+
       //根据图片的容器尺寸和图片的实际尺寸，确定图片显示的初始尺寸
       const { width, height } = image;
       const { imgInitDisplayWidth, imgInitDisplayHeight } = this.genImgInitSize(
@@ -376,6 +399,7 @@ class ZoomPicture extends Component {
       } = this.imgClickInfo;
 
       const { pageX, pageY } = e;
+      if (pageX === null || pageY === null) return;
       const pageXFlag = pageX < 0 ? -1 : 1;
       const pageYFlag = pageY < 0 ? -1 : 1;
 
@@ -384,7 +408,8 @@ class ZoomPicture extends Component {
           commitBlockWith,
           commitBlockHeight,
           offsetLeft,
-          offsetTop
+          offsetTop,
+          isShowPictureDisplaySegmentIndicator
         } = this.state;
         const {
           mouseUp: { clientX: mouseUpLeft, clientY: mouseUpTop },
@@ -435,14 +460,18 @@ class ZoomPicture extends Component {
           imgOffsetTopMin,
           Math.min(imgOffsetTopMax, offsetTop * pageYFlag - (y - pageY) * 0.05)
         );
-        return {
-          offsetLeft: imgOffsetLeft,
-          offsetTop: imgOffsetTop
+        const isImgDisplaySizeBiggerThanContainer = () => {
+          return imgWidth > containerWidth || imgHeight > containerHeight;
         };
-        // return {
-        //   offsetLeft: offsetLeft * pageXFlag - (x - pageX) * 0.05,
-        //   offsetTop: offsetTop * pageYFlag - (y - pageY) * 0.05
-        // };
+        return {
+          //如果因为没有拿到 pageX, x, offsetX, 等 event.target 数据导致，imgOffset 计算出现 NaN 的结果，
+          //则无效化本次拖拽
+          offsetLeft: Number.isNaN(imgOffsetLeft) ? offsetLeft : imgOffsetLeft,
+          offsetTop: Number.isNaN(imgOffsetTop) ? offsetTop : imgOffsetTop,
+          isShowPictureDisplaySegmentIndicator: isImgDisplaySizeBiggerThanContainer()
+            ? true
+            : false
+        };
       });
     } else {
       if (!this.isCommitStart) {
@@ -465,48 +494,19 @@ class ZoomPicture extends Component {
         //动态生成用户评论框
         this.genUserAdjustCommitBlock(e);
       }
-
-      console.log('================ adjust commit block ==============');
     }
   };
   handleImgOnMouseUp = e => {
     if (e) e.stopPropagation();
-    console.log(
-      '----------------------- mouseup info begin -----------------------------'
-    );
-    console.log(e, '============= e ====================');
-    console.log(
-      e.clientX,
-      e.clientY,
-      `============== clientX, clientY ====================`
-    );
-    if (this.imgRef) {
-      console.log(
-        this.imgRef.current.getBoundingClientRect(),
-        '===========img getBoundingClientReact ==============='
-      );
-    }
-    if (this.containerRef) {
-      console.log(
-        this.containerRef.current.getBoundingClientRect(),
-        '=============== container getBoundingClientReact =================='
-      );
-    }
-    console.log(
-      e.pageX,
-      e.pageY,
-      '============ pageX, pageY ==================='
-    );
-    console.log(
-      '-------------------------- mouseup info end --------------------------------------'
-    );
 
     this.isMouseUp = true;
     if (this.timer) {
       clearInterval(this.timer);
     }
     this.setState({
-      commitPublishText: ''
+      commitPublishText: '',
+      isShouldShowCommentDetail: false,
+      shouldShowCommentDetailFlag: -1
     });
 
     this.imgClickInfo.mouseMove = {};
@@ -551,9 +551,9 @@ class ZoomPicture extends Component {
       ) {
         this.setState({
           isShowCommitBlock: true,
-          commitBlockPopoverVisible: true
+          commitBlockPopoverVisible: true,
+          isNewAComment: true
         });
-        console.log('=============== solid commit block ==================');
       } else {
         const { commitBlockPopoverVisible } = this.state;
         if (!commitBlockPopoverVisible) {
@@ -561,13 +561,17 @@ class ZoomPicture extends Component {
             commitBlockPopoverVisible: true
           });
         }
+        this.setState({
+          isNewAComment: true
+        });
       }
     } else {
       const { isLongClick } = this.state;
       if (isLongClick) {
         //初始化长点击
         this.setState({
-          isLongClick: false
+          isLongClick: false,
+          isShowPictureDisplaySegmentIndicator: false
         });
         return;
       }
@@ -586,12 +590,15 @@ class ZoomPicture extends Component {
     if (e) e.stopPropagation();
     this.isMouseUp = false;
     this.isUserAdjustBlockSize = false;
+    this.setState({
+      pictureDisplaySegmentIndicatorWrapper: false
+    });
 
     const storeMouseDownInfo = () => {
       this.imgClickInfo.mouseDown = {
         timeStamp: e.timeStamp,
-        x: e.pageX,
-        y: e.pageY,
+        x: e.pageX ? e.pageX : 0,
+        y: e.pageY ? e.pageY : 0,
         clientX: e.clientX,
         clientY: e.clientY
       };
@@ -634,8 +641,6 @@ class ZoomPicture extends Component {
       }, 50);
     };
     isLongTimeClick();
-    console.log('mousedown timeStamp', e.timeStamp);
-    console.log('mousedown x, y', e.pageX, e.pageY);
   };
   handleCommitBlockCornerMouseMove = (e, direction) => {
     if (e) e.stopPropagation();
@@ -720,7 +725,7 @@ class ZoomPicture extends Component {
         commitBlockHeight: Math.abs(commitBlockHeight + incrementY)
       };
     });
-    console.log('move move move move.....................');
+    // console.log('move move move move.....................');
   };
   handleCommitBlockCornerMouseUp = e => {
     if (e) e.stopPropagation();
@@ -767,10 +772,6 @@ class ZoomPicture extends Component {
     this.setState({
       commitBlockPopoverVisible: true
     });
-  };
-  handleDoubleClickedImg = e => {
-    if (e) e.stopPropagation();
-    console.log('double click............................');
   };
   handleUpdataImgSize = type => {
     const { zoomStep, zoomMax } = this.props;
@@ -835,16 +836,10 @@ class ZoomPicture extends Component {
       currentImgZoomPercent: this.genCurrentImgZoomPercent(type)
     });
   };
-  handleAddCommit = e => {
-    console.log(e, '=========== e =================');
-    console.log('add a commit here ==========================');
-  };
   handleClickedImg = (e, type = 'sup') => {
     if (e) e.stopPropagation();
     const { isCommentMode } = this.state;
-    if (isCommentMode) {
-      this.handleAddCommit(e);
-    } else {
+    if (!isCommentMode) {
       this.handleUpdataImgSize(type);
     }
   };
@@ -877,23 +872,44 @@ class ZoomPicture extends Component {
       height: commitRealHeight
     };
   };
-  handleCommitPublishText = e => {
+  getCommitBlockPositionInfoFromExist = () => {
+    const { commentList } = this.props;
+    const { shouldShowCommentDetailFlag } = this.state;
+
+    const findedCommentItem = commentList.find(
+      i => i.flag === shouldShowCommentDetailFlag
+    );
+    return findedCommentItem.coordinates;
+  };
+  handleCommitPublishText = (e, isNewAComment) => {
     const { handleGetNewComment } = this.props;
     if (e) e.stopPropagation();
-    const { x, y, width, height } = this.getCommitBlockPositionInfo();
-    const { commitPublishText } = this.state;
+    const { x, y, width, height } = isNewAComment
+      ? this.getCommitBlockPositionInfo()
+      : this.getCommitBlockPositionInfoFromExist();
+    const { commitPublishText, shouldShowCommentDetailFlag } = this.state;
     handleGetNewComment({
       coordinates: { x, y, width, height },
-      comment: commitPublishText
+      comment: commitPublishText,
+      point_number: isNewAComment ? '' : shouldShowCommentDetailFlag
     });
-    this.setState({
-      commitPublishText: ''
-    });
-    console.log(x, y, width, height, 'commit block position info.....');
+
+    //这里如果可以直接从 props 的 handleGetNewComment 获得返回的数据，就可以设置打开对应的（commentItem 的 flag 是后台返回的） commentItem
+    //例如  handleGetNewComment.then(() => {
+    //dosomenthing here...
+    // })
+    //所以只能暂时关闭是新建的 commentItem
+    //因为封装 异步的 HandleGetNewComment 比较难受
+    setTimeout(() => {
+      this.setState({
+        commitPublishText: '',
+        isShowCommitBlock: false,
+        commitBlockPopoverVisible: false
+      });
+    }, 1000);
   };
   handleFocusCommitInput = e => {
     if (e) e.stopPropagation();
-    console.log('00000000000000000000000000000000000000000000000000000000000');
     this.setState({
       commitInputPlaceholder: '按 Enter 发布图评',
       showCommitPublishBtn: true
@@ -1212,13 +1228,125 @@ class ZoomPicture extends Component {
       popoverPlacement: popoverPlacement()
     };
   };
+  hiddenCommentPopoverWhenUnHovering = nextProps => {
+    const { hovering } = this.props;
+    const { hovering: nextHovering } = nextProps;
+    if (hovering && !nextHovering) {
+      //如果是鼠标移出 container
+      //隐藏图评框，图评 Popover, 正在显示的 commentItem 块，
+      this.setState({
+        isShowCommitBlock: false,
+        commitBlockPopoverVisible: false,
+        isShouldShowCommentDetail: false,
+        shouldShowCommentDetailFlag: -1,
+        isShowPictureDisplaySegmentIndicator: false
+      });
+    }
+  };
+  getDisplaySegmentsStyle = (indicatorWidth, indicatorHeight) => {
+    const { imgRealWidth, imgRealHeight } = this.state;
+    const {
+      imgInfo: {
+        top: imgTop,
+        left: imgLeft,
+        width: imgWidth,
+        height: imgHeight
+      },
+      containerInfo: {
+        top: containerTop,
+        left: containerLeft,
+        width: containerWidth,
+        height: containerHeight
+      }
+    } = this.imgClickInfo;
+
+    const imgRate = imgWidth / imgRealWidth;
+    const indicatorRate = indicatorWidth / imgRealWidth;
+
+    // const displaySegmentWidth = containerWidth * indicatorWidth / imgRealWidth * indicatorRate
+    // const displaySegmentHeight = containerHeight * indicatorHeight / imgRealHeight * indicatorRate
+    const displaySegmentWidth = (indicatorWidth * containerWidth) / imgWidth;
+    const displaySegmentHeight =
+      (indicatorHeight * containerHeight) / imgHeight;
+    const displaySegmentTop =
+      (((containerTop - imgTop) * imgRealHeight) / imgHeight) *
+      indicatorRate *
+      1.1;
+    const displaySegmentLeft =
+      (((containerLeft - imgLeft) * imgRealWidth) / imgWidth) *
+      indicatorRate *
+      1.1;
+
+    return {
+      width: displaySegmentWidth,
+      height: displaySegmentHeight,
+      top: displaySegmentTop,
+      left: displaySegmentLeft
+    };
+  };
+  componentWillReceiveProps(nextProps) {
+    this.hiddenCommentPopoverWhenUnHovering(nextProps);
+  }
   componentDidMount() {
     //由于后台返回的图片信息中，没有图片的实际宽高等信息，需要手动获取
     this.getMoreImgInfo();
   }
+  renderPictureDisplaySegmentIndicator = () => {
+    const {
+      isShowPictureDisplaySegmentIndicator,
+      imgRealWidth,
+      imgRealHeight
+    } = this.state;
+    const {
+      imgInfo: { url }
+    } = this.props;
+    const indicatorWidth = 100;
+    const indicatorHeight = (imgRealHeight * indicatorWidth) / imgRealWidth;
+    if (!isShowPictureDisplaySegmentIndicator) return null;
+
+    const {
+      width = 0,
+      height = 0,
+      top = 0,
+      left = 0
+    } = this.getDisplaySegmentsStyle(indicatorWidth, indicatorHeight);
+    const displaySegmentStyle = {
+      width,
+      height,
+      top,
+      left
+    };
+    const wrapperStyle = {
+      width: indicatorWidth + 'px',
+      height: indicatorHeight + 'px'
+    };
+
+    const pictureDisplaySegmentIndicatorWrapper = cx({
+      pictureDisplaySegmentIndicatorWrapper: true,
+      pictureDisplaySegmentIndicatorWrapperOpacity: isShowPictureDisplaySegmentIndicator
+        ? false
+        : true
+    });
+    return (
+      <div
+        className={pictureDisplaySegmentIndicatorWrapper}
+        style={wrapperStyle}
+      >
+        <img src={url} height={indicatorHeight} width={indicatorWidth} />
+        <div
+          style={displaySegmentStyle}
+          className={styles.pictureDisplaySegmentIndicatorDisplaySegment}
+        />
+      </div>
+    );
+  };
   renderOperatorBar = () => {
-    const { hovering } = this.props;
-    const { currentImgZoomPercent, isCommentMode, isHideCommentList } = this.state;
+    const { hovering, isFullScreenMode } = this.props;
+    const {
+      currentImgZoomPercent,
+      isCommentMode,
+      isHideCommentList
+    } = this.state;
     const operatorList = [
       {
         label: '缩小',
@@ -1248,7 +1376,7 @@ class ZoomPicture extends Component {
         onClick: () => this.handleOperator('hideCommit')
       },
       {
-        label: '全屏',
+        label: isFullScreenMode ? '退出全屏' : '全屏',
         key: 'fullScreen',
         onClick: () => this.handleOperator('fullScreen')
       }
@@ -1263,17 +1391,26 @@ class ZoomPicture extends Component {
     const wrapperClassName = cx({
       operatorBarWrapper: !isCommentMode ? true : false,
       commitModeOperatorBarWrapper: isCommentMode ? true : false,
-      operatorBarWrapperOpacity: hovering ? false : true
+      operatorBarWrapperOpacity: isFullScreenMode
+        ? false
+        : hovering
+        ? false
+        : true
     });
-    const getOperatorBarCellClass = ({disabled}) => cx({
-      operatorBarCell: true,
-      operatorBarCellDisabled: !!disabled
-    })
+    const getOperatorBarCellClass = ({ disabled }) =>
+      cx({
+        operatorBarCell: true,
+        operatorBarCellDisabled: !!disabled
+      });
     return (
       <div className={wrapperClassName}>
         {!isCommentMode &&
           operatorList.map(i => (
-            <Tooltip title={i.toolTipText} key={i.key}>
+            <Tooltip
+              title={i.toolTipText}
+              key={i.key}
+              overlayStyle={{ zIndex: 999999999999 }}
+            >
               <div onClick={i.onClick} className={getOperatorBarCellClass(i)}>
                 {i.label}
               </div>
@@ -1303,7 +1440,7 @@ class ZoomPicture extends Component {
         <TextArea
           ref={this.commitInputRef}
           placeholder={commitInputPlaceholder}
-          onPressEnter={e => this.handleCommitPublishText(e)}
+          onPressEnter={e => this.handleCommitPublishText(e, true)}
           onFocus={e => this.handleFocusCommitInput(e)}
           value={commitPublishText}
           onChange={this.onCommitPublishTextChange}
@@ -1313,7 +1450,7 @@ class ZoomPicture extends Component {
             <Button
               type="primary"
               size="small"
-              onClick={e => this.handleCommitPublishText(e)}
+              onClick={e => this.handleCommitPublishText(e, true)}
               disabled={!commitPublishText.trim()}
             >
               发布
@@ -1331,20 +1468,21 @@ class ZoomPicture extends Component {
       top,
       popoverPlacement
     } = this.genCommitBlockInfoNew();
-    // const {} = this.gen
+
     const { commitBlockPopoverVisible } = this.state;
-    console.log(left, top, 'lllllllllllllllllllllllll');
     //相对于 img_wrapper, img_wrapper 和图片的尺寸保持一致
     const wrapperStyle = {
       width: commitBlockWith + 'px',
       height: commitBlockHeight + 'px',
       left: left + 'px',
-      top: top + 'px'
+      top: top + 'px',
+      zIndex: this.commentListItemZIndex + 10
     };
     return (
       <Popover
         content={this.renderCommitBlockPopoverContent()}
         title={null}
+        overlayStyle={{ zIndex: 999999999999 }}
         placement={popoverPlacement}
         visible={commitBlockPopoverVisible}
       >
@@ -1440,36 +1578,270 @@ class ZoomPicture extends Component {
     );
   };
   getCommentBlockListItemPosition = (x, y, width, height) => {
-    const {imgRealWidth, imgWidth} = this.state
-    const rate = imgWidth / imgRealWidth
+    const {
+      imgRealWidth,
+      imgWidth,
+      offsetLeft: imgOffsetLeft,
+      offsetTop: imgOffsetTop
+    } = this.state;
+    const rate = imgWidth / imgRealWidth;
     return {
-      offsetLeft: x * rate,
-      offsetTop: y * rate,
+      offsetLeft: x * rate + imgOffsetLeft,
+      offsetTop: y * rate + imgOffsetTop,
       relativeWidth: width * rate,
-      relativeHeight: height * rate,
-    }
-
-  }
-  renderCommentList = () => {
-    const {commentList} = this.props
-    const commentBlockList = commentList.reduce((acc, curr) => {
-      const isExisted = acc.find(i => i.flag === curr.flag)
-      if(isExisted) return acc
-      return [...acc, curr]
-    }, [])
-
-    return <>{commentBlockList.map(({flag, id, coordinates: {x, y, width, height} = {}}) => {
-      const {offsetLeft, offsetTop, relativeWidth, relativeHeight} = this.getCommentBlockListItemPosition(x, y, width, height)
-      const wrapperStyle = {
-        left: offsetLeft + 'px',
-        top: offsetTop + 'px',
-        width: relativeWidth + 'px',
-        height: relativeHeight + 'px',
-        zIndex: this.commentListItemZIndex ++
+      relativeHeight: height * rate
+    };
+  };
+  handleDeleteCommentItem = ({ e, id, type, flag }) => {
+    const { handleDeleteCommentItem } = this.props;
+    const modal = Modal.confirm();
+    modal.update({
+      title: '图评删除确认',
+      content: '确定要删除该条图评吗？ 删除操作不可撤销',
+      zIndex: 999999999999,
+      onOk: () => {
+        handleDeleteCommentItem({ id, type, point_number: flag });
+        modal.destroy();
+      },
+      onCancel: () => {
+        modal.destroy();
       }
-      return(<div key={id} style={wrapperStyle} className={styles.commentBlockListItemWrapper}><div className={styles.commentBlockListItemFlag}>{flag}</div></div>)
-    })}</>
-  }
+    });
+  };
+  handleCommentItemMouseUp = e => {
+    if (e) e.stopPropagation();
+    const { isShowPictureDisplaySegmentIndicator } = this.state;
+    if (isShowPictureDisplaySegmentIndicator) {
+      this.setState({
+        isShowPictureDisplaySegmentIndicator: false
+      });
+    }
+  };
+  handleShowCommentItemDetail = (e, flag) => {
+    const { handleClickedCommentItem } = this.props;
+    if (e) e.stopPropagation();
+
+    const storeClickInfo = () => {
+      let { clientX, clientY } = e;
+      if (clientX === null) clientX = 0;
+      if (clientY === null) clientY = 0;
+      this.commitItemBlockClickInfo = Object.assign(
+        {},
+        this.commitItemBlockClickInfo,
+        { clientX, clientY }
+      );
+    };
+    storeClickInfo();
+
+    this.setState({
+      isShouldShowCommentDetail: false
+    });
+
+    //将当前的flag, 既图评的序号，返回过去
+    handleClickedCommentItem(flag);
+
+    //isShouldShowCommentDetail
+    //获取当前点击的图评的详细信息
+
+    //这里只是为了不让数据产生滞留的效果，
+    //如果外层组件可以传入一个数据loading的 prop，
+    //那么完全不需要这种蹩脚的 hack
+    //可惜没有
+    setTimeout(() => {
+      this.setState({
+        isShouldShowCommentDetail: true,
+        shouldShowCommentDetailFlag: flag,
+        isShowCommitBlock: false, //是否显示评论块
+        commitBlockPopoverVisible: false //图评块 popover visible
+      });
+    }, 500);
+  };
+  renderCommentItemPopoverContent = flag => {
+    const { currentSelectedCommentItemDetail, userId } = this.props;
+    const {
+      commitPublishText,
+      isShouldShowCommentDetail,
+      shouldShowCommentDetailFlag
+    } = this.state;
+    if (!isShouldShowCommentDetail || shouldShowCommentDetailFlag !== flag)
+      return null;
+
+    return (
+      <div className={styles.commentItemPopoverContentWrapper}>
+        <div className={styles.commentItemPopoverContentCommentList}>
+          {currentSelectedCommentItemDetail.map(i => {
+            return (
+              <div
+                key={i.id}
+                className={styles.commentItemPopoverContentCommentListItem}
+              >
+                <div
+                  className={
+                    styles.commentItemPopoverContentCommentListItemAvatar
+                  }
+                >
+                  <Avatar icon="user" />
+                </div>
+                <div
+                  className={
+                    styles.commentItemPopoverContentCommentListItemContent
+                  }
+                >
+                  <div
+                    className={
+                      styles.commentItemPopoverContentCommentListItemContentUserName
+                    }
+                  >
+                    {i.full_name}
+                  </div>
+                  <div
+                    className={
+                      styles.commentItemPopoverContentCommentListItemContentUserText
+                    }
+                  >
+                    {i.text}
+                  </div>
+                  <div
+                    className={
+                      styles.commentItemPopoverContentCommentListItemContentUserTimeAndDelete
+                    }
+                  >
+                    <div
+                      className={
+                        styles.commentItemPopoverContentCommentListItemContentUserTime
+                      }
+                    >
+                      {timestampToTimeNormal(i.update_time, '/', true)}
+                    </div>
+                    {userId &&
+                      userId === i.user_id &&
+                      !judgeTimeDiffer_ten(i.create_time) && (
+                        <div
+                          className={
+                            styles.commentItemPopoverContentCommentListItemContentUserDelete
+                          }
+                          onClick={e =>
+                            this.handleDeleteCommentItem({
+                              e,
+                              id: i.id,
+                              type: i.type,
+                              flag
+                            })
+                          }
+                        >
+                          删除
+                        </div>
+                      )}
+                    {userId &&
+                      userId === i.user_id &&
+                      judgeTimeDiffer_ten(i.create_time) && <div>不可删除</div>}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className={styles.commitPopoverContentWrapper}>
+          <TextArea
+            placeholder="按 Enter 发布图评"
+            onPressEnter={e => this.handleCommitPublishText(e, false)}
+            value={commitPublishText}
+            onChange={this.onCommitPublishTextChange}
+          />
+          <div className={styles.commitPublishWrapper}>
+            <Button
+              type="primary"
+              size="small"
+              onClick={e => this.handleCommitPublishText(e, false)}
+              disabled={!commitPublishText.trim()}
+            >
+              发布
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  renderCommentList = () => {
+    const { commentList } = this.props;
+    const {
+      isShouldShowCommentDetail,
+      shouldShowCommentDetailFlag
+    } = this.state;
+
+    //根据 flag 去重
+    const commentBlockList = commentList.reduce((acc, curr) => {
+      const isExisted = acc.find(i => i.flag === curr.flag);
+      if (isExisted) return acc;
+      return [...acc, curr];
+    }, []);
+    return (
+      <>
+        {commentBlockList.map(
+          ({ flag, id, coordinates: { x, y, width, height } = {} }) => {
+            const {
+              offsetLeft,
+              offsetTop,
+              relativeWidth,
+              relativeHeight
+            } = this.getCommentBlockListItemPosition(x, y, width, height);
+            const wrapperStyle = {
+              left: offsetLeft + 'px',
+              top: offsetTop + 'px',
+              width: relativeWidth + 'px',
+              height: relativeHeight + 'px',
+              zIndex: this.commentListItemZIndex++
+            };
+            const getPopPlacement = () => {
+              const {
+                top: containerTop,
+                left: containerLeft,
+                width: containerWidth,
+                height: containerHeight
+              } = this.containerRef.current.getBoundingClientRect();
+              const { clientX, clientY } = this.commitItemBlockClickInfo;
+
+              const containerCenterPointX = containerLeft + containerWidth / 2;
+              const containerCenterPointY = containerTop + containerHeight / 2;
+              if (clientY >= containerCenterPointY) {
+                return 'top';
+              } else {
+                return 'bottom';
+              }
+            };
+            return (
+              <Popover
+                content={this.renderCommentItemPopoverContent(flag)}
+                title={null}
+                key={flag}
+                overlayStyle={{ zIndex: 999999999999 }}
+                visible={
+                  isShouldShowCommentDetail &&
+                  shouldShowCommentDetailFlag === flag
+                }
+                placement={
+                  shouldShowCommentDetailFlag === flag
+                    ? getPopPlacement()
+                    : 'top'
+                }
+              >
+                <div
+                  key={flag}
+                  onClick={e => this.handleShowCommentItemDetail(e, flag)}
+                  onMouseMove={e => this.handleImgOnMouseMove(e)}
+                  onMouseUp={e => this.handleCommentItemMouseUp(e)}
+                  style={wrapperStyle}
+                  className={styles.commentBlockListItemWrapper}
+                >
+                  <div className={styles.commentBlockListItemFlag}>{flag}</div>
+                </div>
+              </Popover>
+            );
+          }
+        )}
+      </>
+    );
+  };
   renderImg = () => {
     const {
       imgInfo: { url }
@@ -1482,12 +1854,6 @@ class ZoomPicture extends Component {
       offsetLeft,
       offsetTop
     } = this.state;
-    console.log(offsetTop, offsetLeft, '=============offset================');
-    console.log(
-      imgWidth,
-      imgHeight,
-      '=========================img width, img height==========================='
-    );
     const imgStyle = {
       cursor: isCommentMode ? 'crosshair' : isLongClick ? 'grab' : 'zoom-in',
       width: imgWidth,
@@ -1502,8 +1868,6 @@ class ZoomPicture extends Component {
     return (
       <>
         <img
-          // onClick={e => this.handleClickedImg(e)}
-          // onDoubleClick={e => this.handleDoubleClickedImg(e)}
           draggable={false}
           onMouseDown={e => this.handleImgOnMouseDown(e)}
           onMouseUp={e => this.handleImgOnMouseUp(e)}
@@ -1521,9 +1885,17 @@ class ZoomPicture extends Component {
   render() {
     const {
       imgInfo: { url },
-      componentInfo: { width, height }
+      componentInfo: { width, height },
+      bodyClientWidth,
+      bodyClientHeight
     } = this.props;
-    const { imgWidth, imgHeight, isShowCommitBlock, isHideCommentList } = this.state;
+    const {
+      imgWidth,
+      imgHeight,
+      isShowCommitBlock,
+      isHideCommentList,
+      isFullScreenMode
+    } = this.state;
     if (!url) return null;
     const wrapperStyle = {
       width,
@@ -1555,6 +1927,9 @@ class ZoomPicture extends Component {
           : (containerHeightNum - imgHeight - 4) / 2
       }px`
     };
+
+    // const fullScreenWrapperWidth = bodyClientWidth - 100
+    // const fullScreenWrapperHeight = bodyClientHeight - 50
     return (
       <div
         className={styles.wrapper}
@@ -1569,13 +1944,35 @@ class ZoomPicture extends Component {
           {isShowCommitBlock && this.renderCommitBlock()}
         </div>
         <>{this.renderOperatorBar()}</>
+        {/* 有时间可以实现一个全局模式 */}
+        {/* {isFullScreenMode && (
+          <Modal zIndex={9999999999} style={{top: 0, left: 0, height: bodyClientHeight - 300 + 'px'}} footer={null} title={null} width={bodyClientWidth} visible={isFullScreenMode} onCancel={() => this.setState({isFullScreenMode: false})}>
+          <div
+          className={styles.wrapper}
+          style={{width: fullScreenWrapperWidth, height: fullScreenWrapperHeight, textAlign: 'center'}}
+          ref={this.containerRef}
+        >
+          <div className={styles.content_wrapper}>
+            <div className={styles.img_wrapper} style={imgWrapperStyle}>
+              {this.renderImg()}
+              {!isHideCommentList && this.renderCommentList()}
+            </div>
+            {isShowCommitBlock && this.renderCommitBlock()}
+          </div>
+          <>{this.renderOperatorBar()}</>
+        </div>
+          </Modal>
+        )} */}
+        {this.renderPictureDisplaySegmentIndicator()}
       </div>
     );
   }
 }
 
 ZoomPicture.defaultProps = {
-  imgInfo: {}, //需要预览的图片信息,
+  imgInfo: {
+    //url: String
+  }, //需要预览的图片信息,
   componentInfo: {
     //组件信息
     width: '600px',
@@ -1591,155 +1988,57 @@ ZoomPicture.defaultProps = {
     //   comment: commitPublishText,
     // }
   },
+  handleClickedCommentItem: function(flag) {
+    //flag 是指当前点击 图评序号
+  },
+  userId: '1111189894887247872', //当前操作用户的 id, 用来控制用户删除自己已创建的图评， 如果不传，那么就不会显示已有图评中当前用户创建的图评的删除按钮
+  handleDeleteCommentItem: function(obj) {
+    // obj: {
+    //   id,
+    //   type,
+    //   point_number
+    // }
+  },
   //已有的图评列表
   commentList: [
-    {
-      update_time: '1556616000',
-      flag: '1',
-      full_name: '13600419123',
-      create_time: '1556616000',
-      user_id: '1111189894887247872',
-      board_id: '1120583872338333696',
-      file_id: '1122396197282254848',
-      coordinates: { x: 180.3, y: 103, width: 48, height: 48, isAready: false },
-      mobile: '13600419123',
-      id: '1123155024856354816',
-      text: 'kjkljdkjfkjds',
-      type: '1'
-    },
-    {
-      update_time: '1556616097',
-      flag: '2',
-      full_name: '13600419123',
-      create_time: '1556616097',
-      user_id: '1111189894887247872',
-      board_id: '1120583872338333696',
-      file_id: '1122396197282254848',
-      coordinates: { x: 227.3, y: 196, width: 48, height: 48, isAready: false },
-      mobile: '13600419123',
-      id: '1123155432702087168',
-      text: 'bbbbbbbbbbb',
-      type: '1'
-    },
-    {
-      update_time: '1556616105',
-      flag: '2',
-      full_name: '13600419123',
-      create_time: '1556616105',
-      user_id: '1111189894887247872',
-      board_id: '1120583872338333696',
-      file_id: '1122396197282254848',
-      coordinates: { x: 227.3, y: 196, width: 48, height: 48, isAready: false },
-      mobile: '13600419123',
-      id: '1123155464968867840',
-      text: 'adsaaaaadfds',
-      type: '1'
-    },
-    {
-      update_time: '1556616489',
-      flag: '4',
-      full_name: '13600419123',
-      create_time: '1556616489',
-      user_id: '1111189894887247872',
-      board_id: '1120583872338333696',
-      file_id: '1122396197282254848',
-      coordinates: {
-        x: 18.299999999999997,
-        y: 128,
-        width: 48,
-        height: 48,
-        isAready: false
-      },
-      mobile: '13600419123',
-      id: '1123157074788880384',
-      text: 'sdfsdf',
-      type: '1'
-    },
-    {
-      update_time: '1556621666',
-      flag: '5',
-      full_name: '13600419123',
-      create_time: '1556621666',
-      user_id: '1111189894887247872',
-      board_id: '1120583872338333696',
-      file_id: '1122396197282254848',
-      coordinates: { x: 298.3, y: 74, width: 48, height: 48, isAready: false },
-      mobile: '13600419123',
-      id: '1123178791020138496',
-      text: 'sdjfkdsj',
-      type: '1'
-    },
-    {
-      update_time: '1556622652',
-      flag: '6',
-      full_name: '13600419123',
-      create_time: '1556622652',
-      user_id: '1111189894887247872',
-      board_id: '1120583872338333696',
-      file_id: '1122396197282254848',
-      coordinates: { x: 147.3, y: 275, width: 48, height: 48, isAready: false },
-      mobile: '13600419123',
-      id: '1123182925035212800',
-      text: 'iiiiiiiiiiiiiiiiiiiii',
-      type: '1'
-    },
-    {
-      update_time: '1556623994',
-      flag: '7',
-      full_name: '13600419123',
-      create_time: '1556623994',
-      user_id: '1111189894887247872',
-      board_id: '1120583872338333696',
-      file_id: '1122396197282254848',
-      coordinates: { x: 314.3, y: 300, width: 48, height: 48, isAready: false },
-      mobile: '13600419123',
-      id: '1123188553539522560',
-      text: 'aaaaaa',
-      type: '1'
-    },
-    {
-      update_time: '1556624133',
-      flag: '8',
-      full_name: '13600419123',
-      create_time: '1556624133',
-      user_id: '1111189894887247872',
-      board_id: '1120583872338333696',
-      file_id: '1122396197282254848',
-      coordinates: { x: 91.3, y: 15, width: 48, height: 48, isAready: false },
-      mobile: '13600419123',
-      id: '1123189137046900736',
-      text: 'rrrrrrrrrrrrrr',
-      type: '1'
-    },
-    {
-      update_time: '1556624508',
-      flag: '8',
-      full_name: '13600419123',
-      create_time: '1556624508',
-      user_id: '1111189894887247872',
-      board_id: '1120583872338333696',
-      file_id: '1122396197282254848',
-      coordinates: { x: 91.3, y: 15, width: 48, height: 48, isAready: false },
-      mobile: '13600419123',
-      id: '1123190710980448256',
-      text: 'ldksjflkds',
-      type: '1'
-    }
-  ]
-  //   {
-  //     "update_time": "1556624508",
-  //     "flag": "8",
-  //     "full_name": "13600419123",
-  //     "create_time": "1556624508",
-  //     "user_id": "1111189894887247872",
-  //     "board_id": "1120583872338333696",
-  //     "file_id": "1122396197282254848",
-  //     "coordinates": "{"x":91.3,"y":15,"width":48,"height":48,"isAready":false}",
-  //     "mobile": "13600419123",
-  //     "id": "1123190710980448256",
-  //     "text": "ldksjflkds",
-  //    "type": "1"
-  // }
+    // {
+    //   update_time: '1556616000',
+    //   flag: '1',
+    //   full_name: '13600419123',
+    //   create_time: '1556616000',
+    //   user_id: '1111189894887247872',
+    //   board_id: '1120583872338333696',
+    //   file_id: '1122396197282254848',
+    //   coordinates: { x: 180.3, y: 103, width: 48, height: 48, isAready: false },
+    //   mobile: '13600419123',
+    //   id: '1123155024856354816',
+    //   text: 'kjkljdkjfkjds',
+    //   type: '1'
+    // },
+  ],
+  //当前选择的已存在的图评块的详情列表
+  currentSelectedCommentItemDetail: [
+    // {
+    //   update_time: '1556616097',
+    //   flag: '2',
+    //   full_name: '13600419123',
+    //   create_time: '1556616097',
+    //   user_id: '1111189894887247872',
+    //   board_id: '1120583872338333696',
+    //   file_id: '1122396197282254848',
+    //   coordinates: { x: 227.3, y: 196, width: 48, height: 48, isAready: false },
+    //   mobile: '13600419123',
+    //   id: '1123155432702087168',
+    //   text: 'bbbbbbbbbbb',
+    //   type: '1'
+    // }
+  ],
+  handleFullScreen: function() {
+    //全屏模式，
+    //这里其实是可以直接在组件中做的，
+    //但是需要时间的。。。
+  },
+  isFullScreenMode: false //是否全屏模式
 };
 
-export default withHover(ZoomPicture);
+export default withHover(withBodyClientDimens(ZoomPicture));
