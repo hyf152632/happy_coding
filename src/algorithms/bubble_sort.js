@@ -14,29 +14,29 @@
  * //[1,2,3,4]
  */
 const bubble_sort = (numArr, order = 'asc') => {
-  if (!Array.isArray(numArr)) return [];
-  const isAllNum = arr => arr.every(item => typeof item === 'number');
-  if (!isAllNum(numArr)) return [];
+  if (!Array.isArray(numArr)) return []
+  const isAllNum = arr => arr.every(item => typeof item === 'number')
+  if (!isAllNum(numArr)) return []
 
-  const isASC = order === 'asc';
-  const isBigger = (num1, num2) => num1 > num2;
+  const isASC = order === 'asc'
+  const isBigger = (num1, num2) => num1 > num2
   const exchange = (arr, i, j) => {
-    const temp = arr[j];
-    arr[j] = arr[i];
-    arr[i] = temp;
-  };
+    const temp = arr[j]
+    arr[j] = arr[i]
+    arr[i] = temp
+  }
 
   for (let i = 0; i <= numArr.length - 1; i++) {
     for (let j = 1; j < numArr.length - i; j++) {
       if (isASC) {
-        isBigger(numArr[j], numArr[j + 1]) ? exchange(numArr, j, j + 1) : null;
+        isBigger(numArr[j], numArr[j + 1]) ? exchange(numArr, j, j + 1) : null
       } else {
-        isBigger(numArr[j + 1], numArr[j]) ? exchange(numArr, j, j + 1) : null;
+        isBigger(numArr[j + 1], numArr[j]) ? exchange(numArr, j, j + 1) : null
       }
     }
   }
 
-  return numArr;
-};
+  return numArr
+}
 
-export default bubble_sort;
+export default bubble_sort

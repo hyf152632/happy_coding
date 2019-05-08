@@ -11,24 +11,22 @@
  * //[1, 2, 2, 4, 5]
  * */
 const bucket_sort = (arr = [], maxEle = 0) => {
-  if (!Array.isArray(arr)) return [];
-  const isAllOfArrEleIsNum = arr => arr.every(item => typeof item === 'number');
-  if (!isAllOfArrEleIsNum(arr)) return [];
-  const isAllOfArrEleValid = arr => arr.every(item => item <= maxEle);
-  if (!isAllOfArrEleValid(arr)) return [];
+  if (!Array.isArray(arr)) return []
+  const isAllOfArrEleIsNum = arr => arr.every(item => typeof item === 'number')
+  if (!isAllOfArrEleIsNum(arr)) return []
+  const isAllOfArrEleValid = arr => arr.every(item => item <= maxEle)
+  if (!isAllOfArrEleValid(arr)) return []
   //创建一个可以以索引作为“桶”的数组
-  const bucketArr = Array.from({ length: maxEle + 1 }, () => 0);
+  const bucketArr = Array.from({ length: maxEle + 1 }, () => 0)
 
   //将需要被排序的数组的每一个元素，映射到已经创建的桶元素上
-  arr.forEach(item => (bucketArr[item] = bucketArr[item] + 1));
+  arr.forEach(item => (bucketArr[item] = bucketArr[item] + 1))
 
   return bucketArr.reduce(
     (acc, curr, index) =>
-      curr === 0
-        ? acc
-        : [...acc, ...Array.from({ length: curr }, (item, ind) => index)],
+      curr === 0 ? acc : [...acc, ...Array.from({ length: curr }, () => index)],
     []
-  );
-};
+  )
+}
 
-export default bucket_sort;
+export default bucket_sort
