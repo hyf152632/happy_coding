@@ -1,31 +1,24 @@
 /* eslint-disable */
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-  useMemo,
-  forwardRef
-} from 'react';
+import React, { useState, useEffect, useContext, useCallback, useMemo, forwardRef } from 'react'
 
 // Hook 是一种逻辑复用的方式
 // Hook 可以让你在不编写 class 的情况下试用 state 以及其他的 React 特性。
 
 function Example() {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(0)
 
   // 相当于 componentDidMount 和 componentDidUpdate
   useEffect(() => {
     // 使用浏览器的 API 更新页面标题
-    document.title = `You clicked ${count} times.`;
-  });
+    document.title = `You clicked ${count} times.`
+  })
 
   return (
     <div>
       <p>You clicke {count} times</p>
       <button onClick={() => setCount(count + 1)}>Click me</button>
     </div>
-  );
+  )
 }
 
 // 动机
@@ -36,9 +29,9 @@ function Example() {
 
 function ExampleWithManyStates() {
   // 声明多个 state 变量
-  const [age, setAge] = useState(26);
-  const [fruit, setFruit] = useState('banana');
-  const [todos, setTodos] = useState([{ text: 'Learn Hooks' }]);
+  const [age, setAge] = useState(26)
+  const [fruit, setFruit] = useState('banana')
+  const [todos, setTodos] = useState([{ text: 'Learn Hooks' }])
   // ...
 }
 
@@ -49,26 +42,26 @@ function ExampleWithManyStates() {
 // 副作用函数可以通过返回一个函数来指定如何“清除”副作用。
 
 function FriendStatus(props) {
-  const [isOnline, setIsOnline] = useState(null);
+  const [isOnline, setIsOnline] = useState(null)
 
   function handleStatusChange(status) {
-    setIsOnline(status.isOnline);
+    setIsOnline(status.isOnline)
   }
 
   useEffect(() => {
-    const { friend } = props;
-    ChatAPI.subscribeToFriendStatus(friend.id, handleStatusChange);
+    const { friend } = props
+    ChatAPI.subscribeToFriendStatus(friend.id, handleStatusChange)
 
     return () => {
-      ChatAPI.unsubscribeFromFriendStatus(friend.id, handleStatusChange);
-    };
-  });
+      ChatAPI.unsubscribeFromFriendStatus(friend.id, handleStatusChange)
+    }
+  })
 
   if (isOnline === null) {
-    return 'Loading...';
+    return 'Loading...'
   }
 
-  return isOnline ? 'Online' : 'OffLine';
+  return isOnline ? 'Online' : 'OffLine'
 }
 
 // 跟 useState 一样，你可以在组件中多次使用 useEffect
@@ -82,21 +75,21 @@ function FriendStatus(props) {
 // 自定义 Hook
 
 function useFriendStatus(friendID) {
-  const [isOnline, setIsOnline] = useState(null);
+  const [isOnline, setIsOnline] = useState(null)
 
   function handleStatusChange(status) {
-    setIsOnline(status.isOnline);
+    setIsOnline(status.isOnline)
   }
 
   useEffect(() => {
-    ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange);
+    ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange)
 
     return () => {
-      ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange);
-    };
-  });
+      ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange)
+    }
+  })
 
-  return isOnline;
+  return isOnline
 }
 
 // 使用自定义 Hook
@@ -104,22 +97,22 @@ function useFriendStatus(friendID) {
 function FriendStatus(props) {
   const {
     friend: { id }
-  } = props;
-  const isOnline = useFriendStatus(id);
+  } = props
+  const isOnline = useFriendStatus(id)
 
   if (isOnline === null) {
-    return 'Loading...';
+    return 'Loading...'
   }
-  return isOnline ? 'Online' : 'Offline';
+  return isOnline ? 'Online' : 'Offline'
 }
 
 function FriendListItem(props) {
   const {
     friend: { id, name }
-  } = props;
-  const isOnline = useFriendStatus(id);
+  } = props
+  const isOnline = useFriendStatus(id)
 
-  return <li style={{ color: isOnline ? 'green' : 'black' }}>{name}</li>;
+  return <li style={{ color: isOnline ? 'green' : 'black' }}>{name}</li>
 }
 
 // Hook 是一种复用状态逻辑的方式，它不复用 state 本身。
@@ -199,19 +192,19 @@ function FriendListItem(props) {
 // 自定义 Hook 是一个函数，其名称以 "use" 开头， 函数内部可以调用其他的 Hook.
 
 function useFriendStatus(friendID) {
-  const [isOnline, setIsOnline] = useState;
+  const [isOnline, setIsOnline] = useState
 
   useEffect(() => {
     function handleStatusChange(status) {
-      setIsOnline(status.isOnline);
+      setIsOnline(status.isOnline)
     }
 
-    ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange);
+    ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange)
 
     return () => {
-      ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange);
-    };
-  });
+      ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange)
+    }
+  })
 }
 
 // 与 React 组件不同的是，自定义 Hook 不需要具有特殊的标识。
@@ -221,21 +214,21 @@ function useFriendStatus(friendID) {
 // 自定义 Hook 是一种自然遵循 Hook 设计的约定，而不是React的特性
 
 function useReducer(reducer, initialState) {
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState(initialState)
 
   function dispatch(action) {
-    const nextState = reducer(state, action);
-    setState(nextState);
+    const nextState = reducer(state, action)
+    setState(nextState)
   }
 
-  return [state, dispatch];
+  return [state, dispatch]
 }
 
 function Todos() {
-  const [todos, dispatch] = useReducer(todosReducer, []);
+  const [todos, dispatch] = useReducer(todosReducer, [])
 
   function handleAddClick(text) {
-    dispatch({ type: 'add', text });
+    dispatch({ type: 'add', text })
   }
 
   //...
@@ -252,7 +245,7 @@ function Todos() {
 // 该函数将接收先前的 state， 并返回一个更新后的值。
 
 function Counter({ initialCount }) {
-  const [count, setCount] = useState(initialCount);
+  const [count, setCount] = useState(initialCount)
 
   return (
     <>
@@ -261,7 +254,7 @@ function Counter({ initialCount }) {
       <button onClick={() => setCount(prevCount => prevCount + 1)}>+</button>
       <button onClick={() => setCount(prevCount => prevCount - 1)}>+</button>
     </>
-  );
+  )
 }
 
 // 与 class 组件中的 setState 方法不同，useState 不会自动合并更新对象。
@@ -272,15 +265,15 @@ function Counter({ initialCount }) {
 // 如果初始 state 需要通过复杂计算获得，则可以传入一个函数，在函数中计算并返回初始的 state，此函数只在初始渲染时被调用：
 
 const [state, setState] = useState(() => {
-  const initialState = someExpensiveComputation(props);
-  return initialState;
-});
+  const initialState = someExpensiveComputation(props)
+  return initialState
+})
 
 // 如果你在渲染期间执行了高开销的计算，则可以使用 useMemo 来进行优化。
 
 // useEffect
 
-useEffect(didUpdate);
+useEffect(didUpdate)
 
 // 你可以把 effect 看作是从 React 的纯函数世界通往命令式世界的逃生通道。
 
@@ -305,7 +298,7 @@ useEffect(didUpdate);
 
 // useContext
 
-const value = useContext(MyContext);
+const value = useContext(MyContext)
 
 // 接收一个 context 对象（React.createContext 的返回值）并返回该 context 的当前值。
 // 当前的 context 值由上层组件中距离当前组件最近的 <MyContext.Provider> 的 value prop 决定。
@@ -320,7 +313,7 @@ const value = useContext(MyContext);
 // useReducer
 // useState 的代替方案
 
-const [state, dispatch] = useReducer(reducer, initialArg, init);
+const [state, dispatch] = useReducer(reducer, initialArg, init)
 
 // 在某些场景下，useReducer 会比 useState 更适用，例如 state 逻辑较复杂且包含多个子值，或者下一个 state 依赖于之前的 state 等。
 // 并且，使用 useReducer 还能给那些会触发深更新的组件做性能优化，因为你可以向子组件传递 dispatch 而不是回调函数 。
@@ -328,15 +321,15 @@ const [state, dispatch] = useReducer(reducer, initialArg, init);
 // useCallback
 
 const memoizeCallback = useCallback(() => {
-  doSomething(a, b);
-}, [a, b]);
+  doSomething(a, b)
+}, [a, b])
 
 // 把内联回调函数及依赖项数组作为参数传入 useCallback，它将返回该回调函数的 memoized 版本，该回调函数仅在某个依赖项改变时才会更新。
 // 当你把回调函数传递给经过优化的并使用引用相等性去避免非必要渲染（例如 shouldComponentUpdate）的子组件时，它将非常有用。
 
-useCallback(fn, deps);
+useCallback(fn, deps)
 // 相当于
-useMemo(() => fn, deps);
+useMemo(() => fn, deps)
 
 // 注意
 // 依赖项数组不会作为参数传给回调函数。
@@ -345,7 +338,7 @@ useMemo(() => fn, deps);
 
 // useMemo
 
-const memoizedValue = useMemo(() => computedExpensiveValue(a, b), [a, b]);
+const memoizedValue = useMemo(() => computedExpensiveValue(a, b), [a, b])
 
 // 如果没有提供依赖项数组，useMemo 在每次渲染时都会计算新的值。
 
@@ -355,7 +348,7 @@ const memoizedValue = useMemo(() => computedExpensiveValue(a, b), [a, b]);
 
 // useRef
 
-const refContainer = useRef(initialValue);
+const refContainer = useRef(initialValue)
 
 // useRef 返回一个可变的 ref 对象，其 .current 属性被初始化为传入的参数（initialValue）。
 
@@ -363,17 +356,17 @@ const refContainer = useRef(initialValue);
 
 // 一个常见的用例便是命令式的访问子组件：
 function TextInputWithFocusButton() {
-  const inputEl = useRef(null);
+  const inputEl = useRef(null)
   const onButtonClick = () => {
     // `current` 指向已挂载到 DOM 上的文本输入元素
-    inputEl.current.focus();
-  };
+    inputEl.current.focus()
+  }
   return (
     <>
       <input ref={inputEl} type="text" />
       <button onClick={onButtonClick}>Focus the input</button>
     </>
-  );
+  )
 }
 
 // 本质上， useRef 就像是可以在其 .current 属性中保存一个可变值的“盒子”。
@@ -389,40 +382,40 @@ function TextInputWithFocusButton() {
 // 如果想要在 React 绑定或解绑 DOM 节点的 ref 时运行某些代码，则需要使用回调 ref 来实现。
 // 回调 ref:
 function MeasureExample() {
-  const [height, setHeight] = useState(0);
+  const [height, setHeight] = useState(0)
 
   const measureRef = useCallback(node => {
     if (node !== null) {
-      setHeight(node.getBoundingClientRect().height);
+      setHeight(node.getBoundingClientRect().height)
     }
-  }, []);
+  }, [])
 
   return (
     <>
       <h1 ref={measureRef}>Hello, world</h1>
       <h2>The above header is {Math.round(height)}px tall</h2>
     </>
-  );
+  )
 }
 
 // useImperativeHandle
 
-useImperativeHandle(ref, createHandle, [deps]);
+useImperativeHandle(ref, createHandle, [deps])
 
 // useImperativeHandle 可以让你在使用 ref 时自定义暴露给父组件的实例值。
 // 在大多数情况下，应当避免使用 ref 这样的命令式代码。useImperativeHandle 应当与 forwardRef 一起使用：
 
 function FancyInput(props, ref) {
-  const inputRef = useRef();
+  const inputRef = useRef()
   useImperativeHandle(ref, () => ({
     focus: () => {
-      inputRef.current.focus();
+      inputRef.current.focus()
     }
-  }));
-  return <input ref={inputRef} />;
+  }))
+  return <input ref={inputRef} />
 }
 
-FancyInput = forwardRef(FancyInput);
+FancyInput = forwardRef(FancyInput)
 
 // 在本例中，渲染 <FancyInput ref={fancyInputRef} /> 的父组件可以调用 fancyInputRef.current.focus()。
 
@@ -436,7 +429,120 @@ FancyInput = forwardRef(FancyInput);
 
 // useDebugValue
 
-useDebugValue(value);
+useDebugValue(value)
 
 // useDebugValue 可用于在 React 开发者工具中显示自定义 hook 的标签。
 // 我们不推荐你向每个自定义 Hook 添加 debug 值。当它作为共享库的一部分时才最有价值。
+
+function MeasureExample() {
+  const [height, setHeight] = useState(0)
+
+  const measuredRef = useCallback(node => {
+    if (node !== null) {
+      setHeight(node.getBoundingClientRect().height)
+    }
+  }, [])
+
+  return (
+    <>
+      <h1 ref={measuredRef}>Hello, world</h1>
+      <h2>The above header is {Math.round(height)}px tall</h2>
+    </>
+  )
+}
+
+function useClientRect() {
+  const [rect, setRect] = useState(null)
+  const ref = useCallback(node => {
+    if (node !== null) {
+      setRect(node.getBoundingClientRect())
+    }
+  }, [])
+  return [rect, ref]
+}
+
+function ProductPage({ productId }) {
+  const [product, setProduct] = useState(null)
+
+  //把 useEffect 中要使用的 用到了 state 或者 props 中的值的函数，放到相应的 useEffect 中
+  useEffect(() => {
+    async function fetchProduct() {
+      const response = await fetch('http://myapi/product' + productId)
+      const json = await response.json()
+      setProduct(json)
+    }
+
+    fetchProduct()
+  }, [productId])
+
+  //...
+}
+
+//这同时也允许你通过 effect 内部的局部变量来处理无序地响应：
+useEffect(() => {
+  let ignore = false
+  async function fetchProduct() {
+    const response = await fetch('http://myapi/product/' + productId)
+    const json = await response.json()
+    if (!ignore) setProduct(json)
+  }
+  return () => {
+    ignore = true
+  }
+}, [productId])
+
+// 如果 effect 的依赖频繁变化
+//使用 setState 的函数式更新形式
+function Counter() {
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount(c => c + 1)
+    }, 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  return <h1>{count}</h1>
+}
+
+// useRef 不会 像 useState 那样接受一个特殊的函数重载。 相反，你可以编写你自己的函数来创建并将其设为惰性的：
+function Image(props) {
+  const ref = useRef(null)
+  function getObserver() {
+    if (ref.current === null) {
+      ref.current = new IntersectionObserver(onIntersect)
+    }
+    return ref.current
+  }
+
+  // 当你需要时，调用 getObserver()
+  // ...
+}
+
+// 如何避免向下传递回调
+
+// 在大型的组件树中， 推荐的代替方案是通过 context 用 useReducer 往下传一个 dispatch 函数：
+
+const TodosDispatch = React.createContext(null)
+
+function TodosApp() {
+  // dispatch 不会在重新渲染之间变化
+  const [todos, dispatch] = useReducer(todosReducer)
+
+  return (
+    <TodosDispatch.Provider value={dispatch}>
+      <DeepTree todos={todos} />
+    </TodosDispatch.Provider>
+  )
+}
+
+function DeepChild(props) {
+  const dispatch = useContext(TodosDispatch)
+
+  function handleClick() {
+    dispatch({ type: 'add', text: 'hello' })
+  }
+
+  return <button onClick={handleClick}>Add todo</button>
+}
