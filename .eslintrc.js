@@ -12,12 +12,30 @@ module.exports = {
     },
     sourceType: 'module'
   },
-  plugins: ['react'],
+  plugins: ['react', 'react-hooks'],
   rules: {
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn', // <--- THIS IS THE NEW RULE
     indent: ['error', 2],
     'linebreak-style': ['error', 'unix'],
     quotes: ['error', 'single'],
-    semi: ['error', 'never']
+    semi: ['error', 'never'],
+    'prefer-destructuring': [
+      'error',
+      {
+        VariableDeclarator: {
+          array: true,
+          object: true
+        },
+        AssignmentExpression: {
+          array: true,
+          object: true
+        }
+      },
+      {
+        enforceForRenamedProperties: false
+      }
+    ]
   },
   globals: {
     expect: 'readonly',
