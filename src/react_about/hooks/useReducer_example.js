@@ -71,7 +71,7 @@ function scanReducer(state, [type, payload]) {
 }
 const initialState = { pending: 0, booksSaved: [] }
 
-const BookEntryList = props => {
+const BookEntryList_new = props => {
   const [state, dispatch] = useReducer(scanReducer, initialState)
 
   useEffect(() => {
