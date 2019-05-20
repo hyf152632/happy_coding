@@ -30,6 +30,7 @@
     "immutable": "^4.0.0-rc.12",
     "normalizr": "^3.3.0",
     "prop-types": "^15.7.2",
+    "ramda": "^0.26.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-router": "^5.0.0",
