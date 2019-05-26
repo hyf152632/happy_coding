@@ -18,4 +18,4 @@ const getUpdatePerson = R.converge(R.assoc('avatar'), [getUrlFromPerson, R.ident
 
 const result = getUpdatePerson(person)
 
-// console.log(result)
+console.log(result)
