@@ -14,7 +14,7 @@ The basic idea is that, if you call a function with the same inputs over and ove
 
 “Immutable” means “unchangeable”.
 
-Immutability goes hand-in-hand with pure functions. Since pure functions aren’t allowed to have side-effects, they aren’t allowed to change outside data structures. They are forced to work with data in an immutable way.
+Immutability goes hand-in-hand with pure functions. **Since pure functions aren’t allowed to have side-effects, they aren’t allowed to change outside data structures**. They are forced to work with data in an immutable way.
 
 `R.filter`
 `R.reject`
@@ -31,9 +31,9 @@ Note that complement implements the same idea for functions as the ! (`R.not`) o
 
 #### R.both / R.either
 
-Note that both implements the same idea for functions as the && (and) operator does for values, and either implements that same idea for functions as the || (or) operator does for values.
+Note that both implements the same idea for functions as the && (`and`) operator does for values, and either implements that same idea for functions as the || (`or`) operator does for values.
 
-Ramda also provides allPass and anyPass that take an array of any number of functions. As their names suggest, allPass works like both, and anyPass works like either.
+Ramda also provides `allPass` and `anyPass` that take an array of any number of functions. As their names suggest, **allPass works like both, and anyPass works like either**.
 
 ### Pipelines
 
