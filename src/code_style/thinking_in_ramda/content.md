@@ -78,7 +78,9 @@ The more general option is the “placeholder” argument (`R.__`).
 
 ### Imperative vs Declarative
 
-Without going too deep into this, imperative programming is a style of programming where the programmers tell the computer what to do by telling it how to do it. Imperative programming gives rise to a lot of the constructs we use every day: control flow (if-then-else statements and loops), arithmetic operators (+, -, \*, /), comparison operators (===, >, <, etc.), and logical operators (&&, ||, !).
+Without going too deep into this, imperative programming is a style of programming where the programmers tell the computer what to do by telling it how to do it. Imperative programming gives rise to a lot of the constructs we use every day: control flow (if-then-else statements and loops), 
+arithmetic operators (+, -,*, /), comparison operators (===, <, > ,etc.), 
+and logical operators (&&, ||, !).
 
 Declarative programming is a style of programming where the programmers tell the computer what to do by telling it what they want. The computer then has to figure out how to produce the result.
 
@@ -94,17 +96,17 @@ Ramda provides `add`, `subtract`, `multiply`, and `divide` functions to use in p
 
 `R.equals` in place of === and `R.gte` in place of >=
 
-Ramda also provides `R.gt` for >, `R.lt` for <, and `R.lte` for <=.
-
+Ramda also provides `R.lt` for <, `R.gt` for >, and `R.lte` for <=.
+>
 There are a couple of common uses of ===: checking if a string or array is empty (str === '' or arr.length === 0), and checking if a variable is null or undefined. Ramda provides handy functions for both cases: `R.isEmpty` and `R.isNil`.
 
 #### Logic
 
 `R.both` and `R.either` functions in place of && and || operations. We also talked about `R.complement` in place of !.
 
-But sometimes we need to apply &&, ||, and ! to disparate values. For those cases, Ramda gives us and, or, and not functions. I think of it this way: and, or, and not work with values, while both, either, and complement work with functions.
+But sometimes we need to apply &&, ||, and ! to disparate values. For those cases, Ramda gives us `and`, `or`, and `not` functions. I think of it this way: **and, or, and not work with values, while both, either, and complement work with functions**.
 
-We could use the isNil function we just learned about above, but again Ramda has a nicer option for us: `R.defaultTo`.
+We could use the `isNil` function we just learned about above, but again Ramda has a nicer option for us: `R.defaultTo`.
 
 `R.defaultTo` checks if the second argument `R.isNil`. If it isn’t, it returns that as the value, otherwise it returns the first value.
 
@@ -119,17 +121,17 @@ We could use the isNil function we just learned about above, but again Ramda has
 
 `R.identity`
 
-if, as in our case, the second branch is identity, we can use when instead of ifElse:
+if, as in our case, the second branch is identity, we can use `when` instead of `ifElse`:
 
 ```js
 const alwaysDrivingAge = age => when(lt(__, 16), always(16))(age)
 ```
 
-If the first branch of the conditional is identity, we can use `R.unless`. If we reversed our condition to use gte(\_\_, 16) instead, we could use unless.
+If the first branch of the conditional is identity, we can use `R.unless`. If we reversed our condition to use `gte(__, 16)` instead, we could use `unless`.
 
 `R.cond`
 
-Ramda also provides the cond function which can replace a switch statement or a chain of if...then...else statements.
+Ramda also provides the `cond` function which can replace a switch statement or a chain of if...then...else statements.
 
 ## PointFree Style
 
@@ -146,7 +148,7 @@ There are two main guiding principles of Ramda that we talked about in Part 3:
 
 - It makes algorithms clearer. By focusing only on the functions being combined, we get a better sense of what’s going on without the data arguments getting in the way.
 
-- It forces us to think more about the transformation being done than about the data being transformed.
+- **It forces us to think more about the transformation being done than about the data being transformed**.
 
 - It helps us think about our functions as generic building blocks that can work with different kinds of data, rather than thinking about them as operations on a particular kind of data. By giving the data a name, we’re anchoring our thoughts about where we can use our functions. By leaving the data argument out, it allows us to be more creative.
 
