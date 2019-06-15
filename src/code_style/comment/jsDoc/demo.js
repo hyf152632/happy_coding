@@ -149,3 +149,61 @@ function setTitle(newTitle) {
 }
 
 setTitle('aa')
+
+/** Class representing a point. */
+class Point {
+  /**
+   * Create a point.
+   * @param {number} x - The x value.
+   * @param {number} y - The y value.
+   */
+  constructor(x, y) {
+    this.x = x
+    this.y = y
+  }
+  /**
+   * Get the x value.
+   * @return {number} The x value
+   */
+  getX() {
+    return this.x
+  }
+  /**
+   * Convert a string containing two comma-separate number into a point.
+   * @param {string} str - The string containing two comma-separated numbers.
+   * @return {Point} A Point object.
+   */
+  static fromString(str) {
+    const [x, y] = str.split(',').map(Number)
+    return new Point(x, y)
+  }
+}
+
+// Extending classes（扩展类）
+// 当您使用 extends关键字来扩展一个现有的类的时候，你还需要告诉JSDoc哪个类是你要扩展的。 为此，您可以使用 @augments (或 @extends) 标签。
+
+// 例如，扩展如上所示Point 类，扩展一个 ES 2015 类：
+
+/**
+ * Class representig a dot.
+ * @extends Point
+ */
+class Dot extends Point {
+  /**
+   * Create a dot.
+   * @param {number} x - The x value.
+   * @param {number} y - The y value.
+   * @param {number} width - The width of the dot, in pixels
+   */
+  constructor(x, y, width) {
+    super(x, y)
+    this.width = width
+  }
+  /**
+   * Get the dot's width.
+   * @return {number} The dot's width, in pixels.
+   */
+  getWidth() {
+    return this.width
+  }
+}
