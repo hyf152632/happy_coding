@@ -1,0 +1,11 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+[*.{js,py}]
+charset = utf-8
+
+[src/**.js, demos/**.js, books/**.js, articles/**.js]
+indent_style = space
+indent_size = 2
