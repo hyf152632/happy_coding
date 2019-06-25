@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      .table-row {
+        display: table;
+        table-layout: fixed;
+        width: 100%;
+        height: 30px;
+        border-top: 5px solid blue;
+        font-size: 0;
+      }
+
+      .table-row .title,
+      .table-row .text {
+        display: table-cell;
+        outline: 1px solid red;
+        vertical-align: middle;
+        overflow-wrap: break-word;
+        word-break: break-all;
+        font-size: 12px;
+      }
+
+      .table-row .title {
+        width: 38%;
+        padding-left: 15px;
+        border-right: 2px solid black;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper">
+      <div class="title-wrapper">
+        <div class="icon"></div>
+        <h1 class="title">招标工程概况</h1>
+      </div>
+      <div class="table-row">
+        <div class="title">标段名称</div>
+        <div class="text">
+          深圳市龙华部酒窝淤泥炸土收把出二期工程机心无位于你咋图搜吧长工程项目管理
+        </div>
+      </div>
+      <div class="table-row">
+        <div class="title">标段编号</div>
+        <div class="text">7238957832789758732</div>
+      </div>
+      <div class="table-row">
+        <div class="title">建设单位</div>
+        <div class="text">深圳市住房和建设局</div>
+      </div>
+      <div class="table-row">
+        <div class="title">工程类型</div>
+        <div class="text">货物采购</div>
+      </div>
+      <div class="table-row">
+        <div class="title">标段金额</div>
+        <div class="text">100.00万元</div>
+      </div>
+    </div>
+  </body>
+</html>
