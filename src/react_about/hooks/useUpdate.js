@@ -1,13 +1,13 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react'
 function useUpdate(fn) {
-  const mounting = useRef(true);
+  const mounting = useRef(true)
   useEffect(() => {
     if (mounting.current) {
-      mounting.current = false;
+      mounting.current = false
     } else {
-      fn();
+      fn()
     }
-  });
+  })
 }
 
-export default useUpdate;
+export default useUpdate
