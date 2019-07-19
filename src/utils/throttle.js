@@ -51,3 +51,67 @@ export function throttle_(fn, interval) {
     }
   }
 }
+
+const throttle_new = function(fn, delay) {
+  let last = 0
+  let timer = null
+
+  return function() {
+    let context = this
+    let args = arguments
+    let now = +new Date()
+
+    if (now - last < delay) {
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        last = now
+        fn.apply(context, args)
+      }, delay)
+    } else {
+      last = now
+      fn.apply(context, args)
+    }
+  }
+}
+
+const compose = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)))
+
+const map = (fn, arr = []) => {
+  let retArr = []
+  for (let i = 0; i < arr.length; i++) {
+    retArr[i] = fn(arr[i], i, arr)
+  }
+  return retArr
+}
+
+const inc = a => a + 1
+console.log(map(inc, [1, 2, 3]))
+
+const filter = (fn, arr = []) => {
+  const resArr = []
+  for (let i = 0; i < arr.length; i++) {
+    if (fn(arr[i], i, arr)) {
+      resArr.push(arr[i])
+    }
+  }
+  return resArr
+}
+
+const isOdd = num => num % 2 !== 0
+
+console.log(filter(isOdd, [1, 2, 3, 4]))
+
+const reduce = (fn, initValue, arr = []) => {
+  if (!Array.isArray(arr)) {
+    return initValue
+  }
+  let ret = initValue || null
+  for (let i = 0; i < arr.length; i++) {
+    ret = fn(ret, arr[i], i, arr)
+  }
+  return ret
+}
+
+const sum = (a, b) => a + b
+
+console.log(reduce(sum, undefined, [1, 2, 3, 4, 5]))
