@@ -106,7 +106,7 @@ function withSubscription(WrappedComponent) {
     return WithSubscription
 }
 
-functionn getDisplayName(WrappedComponent) {
+function getDisplayName(WrappedComponent) {
     return WrappedComponent.displayName || WrappedComponent.name || 'Component'
 }
 
