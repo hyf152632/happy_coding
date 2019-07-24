@@ -63,3 +63,16 @@ function repeater(count) {
     return str
   }
 }
+
+// Changing Function Shape with Curry
+function add(x, y) {
+  return x + y
+}
+;[0, 2, 4, 6, 8].map(function addOne(v) {
+  return add(1, v)
+})
+
+add = curry(add)
+;[0, 2, 4, 6, 8].map(add(1))
+
+const compose = (...fns) => fns.reduce((fn2, fn1) => (...args) => fn2(fn1(...args)))
