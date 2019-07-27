@@ -443,3 +443,52 @@ Maybe.of(someObj)
 
 There are many kinds of monads:
 Just, Nothing, Maybe, Either, IO, etc
+
+## Async
+
+Rxjs
+
+Rx.Subject()
+
+## Functional JS Utils
+
+### Lodash/FP
+
+```js
+const fp = require('lodash/fp')
+fp.reduce((acc, v) => acc + v, 0, [3, 7, 9])
+
+const f = fp.curryN(3, function f(x, y, z) {
+  return x + y * z
+})
+
+const g = fp.compose([fp.add(1), f(1, 4)])
+```
+
+### Ramda
+
+recommend
+
+### fpo
+
+Named arguments
+
+```js
+FPO.std.reduce((acc, v) => acc + v, undefined, [2, 3, 9])
+
+// named-argument method style
+FPO.reduce({
+  arr: [2, 3, 9],
+  fn: ({ acc, v }) => acc + v
+})
+```
+
+## Wrapping up
+
+- Functions(point-free)
+- Closure
+- Composition
+- Immutability
+- Recursion
+- Lists & Data Structures
+- Async(observables)
