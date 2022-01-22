@@ -1,0 +1,39 @@
+.retina_box {
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+.retina_image {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+.retina_radius {
+    display: none;
+    width: 220px;
+    height: 220px;
+    border-width: 3px;
+    border-style: solid;
+    border-color: #fff;
+    border-radius: 110px;
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.6), 0 0 5px rgba(0, 0, 0, 0.25) inset;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: all 0.3s;
+}
+
+.retina_radius_show {
+    display: inherit;
+}
+
+.retina_radius_ie {
+    display: none;
+    display: block;
+    _display: none;
+    position: absolute;
+    left: -7px;
+    top: -7px;
+}
