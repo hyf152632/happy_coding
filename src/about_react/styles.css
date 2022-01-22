@@ -1,0 +1,39 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+.App {
+  font-family: sans-serif;
+  text-align: center;
+  width: 100vw;
+  height: 100vw;
+}
+.content-wrapper {
+  display: flex;
+  text-align: left;
+}
+.menu {
+  width: 30vw;
+  min-height: 100vh;
+  text-align: center;
+  border-right: 2px solid #eee;
+  padding: 10px;
+  cursor: pointer;
+}
+.menu-item {
+  list-style: none;
+  padding: 5px;
+  border-bottom: 2px solid #eee;
+}
+.menu-item a {
+  text-decoration: none;
+}
+.page-container {
+  width: 70vw;
+  height: 100vh;
+  padding: 10px;
+}
+
+.nav-selected {
+  font-weight: 600;
+}
