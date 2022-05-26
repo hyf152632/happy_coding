@@ -64,3 +64,13 @@ function lookAt(position, target, up) {
     1,
   ];
 }
+
+function isPowerOf2(value) {
+  return (value & (value - 1)) === 0;
+}
+
+console.log(`is 2 is power of 2 ? ${isPowerOf2(2)}`);
+console.log(`is 4 is power of 2 ? ${isPowerOf2(4)}`);
+console.log(`is 5 is power of 2 ? ${isPowerOf2(5)}`);
+console.log(`is 8 is power of 2 ? ${isPowerOf2(8)}`);
+console.log(`is 512 is power of 2 ? ${isPowerOf2(512)}`);
