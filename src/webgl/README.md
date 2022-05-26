@@ -10,6 +10,7 @@
 - [二维矩阵](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-2d-matrices.html&group=J2DqPeaM);
 - [三维正射投影](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-3d-orthographic.html&group=J2DqPeaM);
 - [三维透视投影](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-3d-perspective.html&group=J2DqPeaM);
+- [三维相机](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-3d-camera.html&group=J2DqPeaM);
 
 ```js
 // 计算第一个 F 的位置
@@ -30,3 +31,39 @@ var cameraMatrix = m4.lookAt(cameraPosition, fPosition, up);
 // 通过相机矩阵获得视图矩阵
 var viewMatrix = m4.inverse(cameraMatrix);
 ```
+
+相机是什么？
+是观察场景的特定角度。
+在实现上是应用在场景中每个模型的一个变换矩阵;
+
+```js
+/* 获取相机矩阵 */
+cameraMatrix = lookAt(position, target, up);
+/* 获取视图矩阵，是相机矩阵的逆 */
+viewMatrix = cameraMatrix.inverse();
+/* 投影矩阵 */
+projectionMatrix = perspective(fieldOfViewRadians, aspect, zNear, zFar);
+/* 视图投影矩阵， 投影 * 视图 */
+viewProjectionMatrix = multiply(projectionMatrix, viewMatrix);
+/* 物体变换应用于视图投影， 得到最终矩阵 */
+// translate, rotate, scale
+matrix = translate(viewProjectionMatrix, tx, 0, ty);
+```
+
+场景中模型变换的最终矩阵 = multiply(
+视图投影矩阵,
+模型变换矩阵，
+)
+
+模型变换矩阵 = multiply(
+平移矩阵，
+旋转矩阵，
+缩放矩阵
+)
+
+视图投影矩阵 = multiply(
+投影矩阵，
+视图矩阵，
+)
+
+视图矩阵 = inverse(相机矩阵)
