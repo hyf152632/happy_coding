@@ -17,6 +17,7 @@
 - [渲染到纹理](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-render-to-texture.html&group=J2DqPeaM);
 - [三维方向光源](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-3d-lighting-directional.html&group=J2DqPeaM);
 - [三维点光源](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-3d-lighting-point.html&group=J2DqPeaM);
+- [三维聚光灯](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-3d-lighting-spot.html&group=J2DqPeaM);
 
 ```js
 // 计算第一个 F 的位置
