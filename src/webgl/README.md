@@ -14,6 +14,8 @@
 - [动画](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-animation.html&group=J2DqPeaM);
 - [三维纹理](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-3d-textures.html&group=J2DqPeaM);
 - [数据纹理](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-data-textures.html&group=J2DqPeaM);
+- [渲染到纹理](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-render-to-texture.html&group=J2DqPeaM);
+- [三维方向光源](https://hyp.is/go?url=https%3A%2F%2Fwebglfundamentals.org%2Fwebgl%2Flessons%2Fzh_cn%2Fwebgl-3d-lighting-directional.html&group=J2DqPeaM);
 
 ```js
 // 计算第一个 F 的位置
