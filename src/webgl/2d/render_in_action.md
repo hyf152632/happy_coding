@@ -39,7 +39,37 @@ COM(Component Object Modal，组件对象模型)
 
 XHR 是 XMLHttpRequest 对象的简称。
 
-XMLHttpRequestResponseType
+`XMLHttpRequestResponseType`
 
 可以使用如 arraybuffer 选项来请求二进制资源
 二进制文件的特点就是比文本文件小得多，缺点是我们要明确无误地知道数据是如何存储的，每个数据代表什么含义。
+
+## chp3
+
+动画
+
+`requestAnimationFrame`
+
+不间断地，基于时间的更新与重绘
+
+- while(true){}
+- requestAnimationFrame(function(){}), setTimeout, setInterval
+
+60 Hz 每秒刷新 60 次
+
+request Animation Frame 是一个与硬件相关 的方法，该方法会保持与监视器刷新频率一致的状态。
+
+两帧之间的时间间隔 (intervalMsec)总是 16.66 毫秒的倍数(当前监视器屏幕刷新频率 60 赫兹，折算成每帧需要 16.66 毫秒刷新一次)。
+
+基于时间差的动画的速率，不会受特定机器的影响。
+
+静态类结构图
+
+如果我们设计的类能够被继 承、被扩展，那么最好将成员变量声明为 protected，这样子类也能访 问这些成员变量。
+
+需要注意的一点是，上述代码并没有真正删除 Timer，而是将要删除的 Timer 的 enabled 标记为 false，这样避免了析构 Timer 的内存，并且不会调整数组的内容，可以称之为逻辑删除。
+如果下次又要增加一个新的 Timer，会先查找 enabled 为 false 的 Timer，如果存在，可以重用该 Timer，这样又避免了 new 一个新的 Timer 对象.
+
+只增不减，重复使用，以达到设计目标的第四条要求:尽量让内存 使用与运行效率达到相对平衡。
+
+使用模板方法设计 模式将固定的流程封装起来，将可变的操作以虚函数的形式提供给第三方.
