@@ -73,3 +73,8 @@ request Animation Frame 是一个与硬件相关 的方法，该方法会保持�
 只增不减，重复使用，以达到设计目标的第四条要求:尽量让内存 使用与运行效率达到相对平衡。
 
 使用模板方法设计 模式将固定的流程封装起来，将可变的操作以虚函数的形式提供给第三方.
+
+`this.context2D.clearRect(0, 0, this.context2D.canvas.width, this.context2D.canvas.height);`
+
+`beginPath, moveTo, lineTo, closePath, fill, stroke, restore`;
+

@@ -2,45 +2,45 @@ module.exports = {
   env: {
     browser: true,
     es6: true,
-    node: true
+    node: true,
   },
-  extends: 'eslint:recommended',
+  extends: "eslint:recommended",
   parserOptions: {
     ecmaVersion: 9,
     ecmaFeatures: {
-      jsx: true
+      jsx: true,
     },
-    sourceType: 'module'
+    sourceType: "module",
   },
-  plugins: ['react', 'react-hooks'],
+  plugins: ["react", "react-hooks"],
   rules: {
-    'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn', // <--- THIS IS THE NEW RULE
-    indent: ['error', 2],
-    'no-console': 'off',
-    'linebreak-style': ['error', 'unix'],
-    quotes: ['error', 'single'],
-    semi: ['error', 'never'],
-    'prefer-destructuring': [
-      'error',
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn", // <--- THIS IS THE NEW RULE
+    indent: ["error", 2],
+    "no-console": "off",
+    "linebreak-style": ["error", "unix"],
+    // quotes: ['error', 'single'],
+    // semi: ['error', 'never'],
+    "prefer-destructuring": [
+      "error",
       {
         VariableDeclarator: {
           array: true,
-          object: true
+          object: true,
         },
         AssignmentExpression: {
           array: true,
-          object: true
-        }
+          object: true,
+        },
       },
       {
-        enforceForRenamedProperties: false
-      }
-    ]
+        enforceForRenamedProperties: false,
+      },
+    ],
   },
   globals: {
-    expect: 'readonly',
-    test: 'readonly',
-    describe: 'readonly'
-  }
-}
+    expect: "readonly",
+    test: "readonly",
+    describe: "readonly",
+  },
+};

@@ -1,31 +1,31 @@
-module.exports = api => {
-  const isTest = api.env('test')
+module.exports = (api) => {
+  // const isTest = api.env("test");
   // You can use isTest to determine what presets and plugins to use.
 
   return {
     presets: [
       [
-        '@babel/preset-env',
+        "@babel/preset-env",
         {
           targets: {
-            node: 'current'
-          }
-        }
+            node: "current",
+          },
+        },
       ],
-      '@babel/preset-react'
+      "@babel/preset-react",
     ],
     plugins: [
-      '@babel/plugin-proposal-class-properties',
+      "@babel/plugin-proposal-class-properties",
       [
-        'module-resolver',
+        "module-resolver",
         {
-          root: ['./src'],
+          root: ["./src"],
           alias: {
-            '@src': './src',
-            '@test': './test'
-          }
-        }
-      ]
-    ]
-  }
-}
+            "@src": "./src",
+            "@test": "./test",
+          },
+        },
+      ],
+    ],
+  };
+};
